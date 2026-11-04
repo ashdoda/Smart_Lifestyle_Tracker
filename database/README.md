@@ -23,6 +23,8 @@ The full database (about 570 MB) and the original fitness file (72 MB) are **not
 
 All commands below are run from inside this folder: `cd database`.
 
+**Windows and Mac:** the commands are written for Mac and Linux, with `python3`. **On Windows, type `python` instead of `python3`** (or `py`). Everything else is the same on both. Each command goes on one line, so don't press Enter partway through a long one.
+
 ## Quick start with the sample database
 
 `sample.db` has the same tables as the full database, but only users 1 to 50 and their rows. Use it to build and test against. **It is a subset, so totals and averages from it will not match the full 999 users.**
@@ -55,9 +57,10 @@ To browse the tables without writing code, open `sample.db` in [DB Browser for S
    python3 scripts/download_fitness_data.py
    ```
    This saves `fitness_tracker_dataset.csv` in this folder (git ignores it). The script checks that it is exactly the version the check-in data was built from, and does nothing if the file is already there. If Kaggle asks for credentials, make a free Kaggle account, create an API token under Settings, and set the `KAGGLE_USERNAME` and `KAGGLE_KEY` environment variables.
-2. Unzip the data into a `data/` folder (git ignores it):
+2. Unzip the data into a `data/` folder (git ignores it). `tar` comes with both Windows 10+ and macOS, so the same two commands work on both. You can also unzip by hand, as long as the result is `data/synthetic_checkins/`:
    ```
-   unzip synthetic_checkins_data.zip -d data/
+   mkdir data
+   tar -xf synthetic_checkins_data.zip -C data
    ```
    This creates `data/synthetic_checkins/` with `users.csv`, `user_names.csv`, `question_bank.csv`, `checkins.csv`, `responses.csv` and `tier_events.csv`.
 3. Build the database (about 40 seconds):
