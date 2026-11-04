@@ -14,6 +14,7 @@ The data is a fitness tracker dataset (1,000,000 rows, 999 users) with simulated
 | `schema.sql` | Table definitions, constraints and indexes |
 | `build_db.py` | Builds the full database from the CSV files (standard library only) |
 | `example_queries.sql` | Six example queries |
+| `check_db.py` | Quick check that a database file loaded correctly |
 | `scripts/` | The scripts that generated the data (see "Regenerating the data") |
 | `synthetic_checkins_data.zip` | The full synthetic data as six CSV files (about 30 MB zipped, 250 MB unzipped) |
 | `scripts/download_fitness_data.py` | Downloads the original fitness dataset (72 MB) from Kaggle into this folder |
@@ -47,6 +48,8 @@ for r in rows:
 
 Always pass values as `?` parameters (as above), never by pasting them into the SQL string.
 
+To confirm the file opens correctly, run `python3 check_db.py sample.db`. It prints the row counts and one example check-in.
+
 To browse the tables without writing code, open `sample.db` in [DB Browser for SQLite](https://sqlitebrowser.org/) (free). `example_queries.sql` has queries you can paste in.
 
 ## Building the full database
@@ -69,8 +72,20 @@ To browse the tables without writing code, open `sample.db` in [DB Browser for S
    ```
    Add `--force` to rebuild an existing `checkins.db`. The script checks that every table links correctly and stops with an error if anything doesn't.
 4. The result is `checkins.db` (about 570 MB). It's ignored by git on purpose. Don't commit it. Every teammate builds their own copy.
+5. Check it worked: `python3 check_db.py checkins.db` (see "Checking that it works" below). It should print `Full database row counts: OK` and `Foreign key check: OK`.
 
 Expected row counts: 999 users, 1,000,000 fitness rows, 1,396,895 check-ins, 2,395,124 responses.
+
+## Checking that it works
+
+`check_db.py` prints the row counts, runs the foreign key check and shows one example check-in. It opens the file read-only, so it can't change anything.
+
+```
+python3 check_db.py sample.db
+python3 check_db.py checkins.db
+```
+
+For the full database it also compares the row counts against the expected ones and prints `OK` or `MISMATCH`.
 
 ## What's in the data
 
