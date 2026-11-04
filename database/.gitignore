@@ -4,3 +4,6 @@
 data/
 __pycache__/
 *.pyc
+
+# downloaded from Kaggle by scripts/download_fitness_data.py
+fitness_tracker_dataset.csv

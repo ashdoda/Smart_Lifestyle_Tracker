@@ -15,9 +15,11 @@ The data is a fitness tracker dataset (1,000,000 rows, 999 users) with simulated
 | `build_db.py` | Builds the full database from the CSV files (standard library only) |
 | `example_queries.sql` | Six example queries |
 | `scripts/` | The scripts that generated the data (see "Regenerating the data") |
-| `requirements.txt` | `pandas` and `numpy`, needed only by the scripts in `scripts/` |
+| `synthetic_checkins_data.zip` | The full synthetic data as six CSV files (about 30 MB zipped, 250 MB unzipped) |
+| `scripts/download_fitness_data.py` | Downloads the original fitness dataset (72 MB) from Kaggle into this folder |
+| `requirements.txt` | `kagglehub` for the download script, `pandas` and `numpy` for the generator scripts |
 
-The full data (about 250 MB of CSV) and the full database (about 570 MB) are **not** in the repo because of GitHub's 100 MB file limit. The CSVs are in a zip attached to the repo's Releases page, and you build the database from them (see below).
+The full database (about 570 MB) and the original fitness file (72 MB) are **not** in the repo. The database is too big for GitHub's 100 MB file limit, and the fitness file is downloaded from Kaggle by a script instead. You build the database on your own machine (see below). Every time a large file is changed and committed, git keeps the old copy too, so only re-commit `synthetic_checkins_data.zip` when the data actually changes.
 
 All commands below are run from inside this folder: `cd database`.
 
@@ -47,15 +49,20 @@ To browse the tables without writing code, open `sample.db` in [DB Browser for S
 
 ## Building the full database
 
-1. Download `synthetic_checkins_data.zip` and `fitness_tracker_dataset.csv` from the repo's Releases page (`https://github.com/<ORG>/<REPO>/releases`) and put them in a `data/` folder inside this one.
-2. Unzip the data:
+1. Download the original fitness dataset from Kaggle (once per machine):
    ```
-   unzip data/synthetic_checkins_data.zip -d data/
+   pip install kagglehub
+   python3 scripts/download_fitness_data.py
    ```
-   This creates `data/synthetic_checkins/` with `users.csv`, `user_names.csv`, `question_bank.csv`, `checkins.csv`, `responses.csv`, `tier_events.csv` and a README.
+   This saves `fitness_tracker_dataset.csv` in this folder (git ignores it). The script checks that it is exactly the version the check-in data was built from, and does nothing if the file is already there. If Kaggle asks for credentials, make a free Kaggle account, create an API token under Settings, and set the `KAGGLE_USERNAME` and `KAGGLE_KEY` environment variables.
+2. Unzip the data into a `data/` folder (git ignores it):
+   ```
+   unzip synthetic_checkins_data.zip -d data/
+   ```
+   This creates `data/synthetic_checkins/` with `users.csv`, `user_names.csv`, `question_bank.csv`, `checkins.csv`, `responses.csv` and `tier_events.csv`.
 3. Build the database (about 40 seconds):
    ```
-   python3 build_db.py --data-dir data/synthetic_checkins --fitness data/fitness_tracker_dataset.csv --db checkins.db
+   python3 build_db.py --data-dir data/synthetic_checkins --fitness fitness_tracker_dataset.csv --db checkins.db
    ```
    Add `--force` to rebuild an existing `checkins.db`. The script checks that every table links correctly and stops with an error if anything doesn't.
 4. The result is `checkins.db` (about 570 MB). It's ignored by git on purpose. Don't commit it. Every teammate builds their own copy.
@@ -93,20 +100,22 @@ Expected row counts: 999 users, 1,000,000 fitness rows, 1,396,895 check-ins, 2,3
 
 ## Regenerating the data
 
-You only need this to change the fake data. To use it as is, download the zip instead.
+You only need this to change the fake data. To use it as is, use the zip in this folder instead. Download the fitness file first (step 1 of "Building the full database").
 
 ```
 pip install -r requirements.txt
-python3 scripts/generate_synthetic_checkins.py --input data/fitness_tracker_dataset.csv --outdir data/synthetic_checkins
+python3 scripts/generate_synthetic_checkins.py --input fitness_tracker_dataset.csv --outdir data/synthetic_checkins
 python3 scripts/generate_user_names.py --users data/synthetic_checkins/users.csv --out data/synthetic_checkins/user_names.csv
-python3 scripts/add_nightly_content_question.py --data-dir data/synthetic_checkins --fitness data/fitness_tracker_dataset.csv
+python3 scripts/add_nightly_content_question.py --data-dir data/synthetic_checkins --fitness fitness_tracker_dataset.csv
 ```
+
+If you regenerate the data for the whole team, zip the six CSV files in `data/synthetic_checkins/` into a new `synthetic_checkins_data.zip` (with the `synthetic_checkins/` folder inside it) and replace the one in this folder.
 
 Run them in that order. All three use fixed seeds, so running them again on the same fitness file gives **identical files** (checked with checksums). The percentages and rules (domain mix, tier mix, adherence, drop-off) are named settings at the top of `generate_synthetic_checkins.py`. The last script refuses to run twice on the same folder.
 
 ## Things to know
 
-- The fitness file is itself random. For example, `active_minutes` can be above 1,440, and workout types don't match step counts. Check-in answers only loosely follow it (mood, sleep and steps nudge the answers).
+- The fitness file is itself synthetic and random (its Kaggle page describes it as synthetic). For example, `active_minutes` can be above 1,440, and workout types don't match step counts. Check-in answers only loosely follow it (mood, sleep and steps nudge the answers).
 - Free-text answers come from small phrase pools, so they repeat a lot.
 - Check-ins are only created on days a user has fitness data (about 63% of days), so a day with no fitness data has no check-in row at all, not even a skipped one.
 - `quick` check-ins have no domain-specific daily questions, only the general questions. Weekly questions do cover each of the user's domains.
@@ -117,6 +126,10 @@ Run them in that order. All three use fixed seeds, so running them again on the 
 
 - Anything in the backend or front-end folders.
 - Any scoring or summary of how a user's day went. The database only stores the raw answers and fitness data.
+
+## Data source
+
+`fitness_tracker_dataset.csv` is the [Fitness Tracker Dataset](https://www.kaggle.com/datasets/smayanj/fitness-tracker-dataset) from Kaggle (`smayanj/fitness-tracker-dataset`), which describes it as synthetic fitness data (steps, sleep, mood, heart rate and workouts). It is downloaded rather than stored in the repo, so check the dataset's license on its Kaggle page before redistributing it. Everything else in this folder (check-in answers, names, tiers) was generated for this project on top of it.
 
 ## Handling data
 
