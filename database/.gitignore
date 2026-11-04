@@ -1,0 +1,6 @@
+# Ignore the big files built locally. Only sample.db is kept in git.
+*.db
+!sample.db
+data/
+__pycache__/
+*.pyc
