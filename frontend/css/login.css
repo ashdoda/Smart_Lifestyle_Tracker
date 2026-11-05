@@ -1,0 +1,38 @@
+/* ===== Sign in + create patient account ===== */
+.login{display:grid;grid-template-columns:minmax(340px,5fr) minmax(440px,6fr);min-height:calc(100dvh - var(--proto-h,52px))}
+.login .hero{position:relative;overflow:hidden;background:var(--sky);min-height:420px}
+.login .hero>svg{position:absolute;inset:0;width:100%;height:100%}
+.login .hero .copy{position:relative;z-index:2;padding:var(--s12) var(--s12) 0;max-width:520px}
+.login .hero h1{font-size:var(--t-3xl);letter-spacing:-.02em;line-height:1.05}
+.login .hero p{margin-top:var(--s4);color:var(--ink2);font-size:var(--t-lg);line-height:1.4;max-width:30ch}
+.brandmark{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:var(--t-lg);letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.brandmark svg{width:34px;height:34px;flex:none}
+.login .hero .brandmark{margin-bottom:var(--s10)}
+.login .pane{display:grid;place-items:center;padding:var(--s10) var(--s6)}
+.login .panel{width:min(460px,100%);display:flex;flex-direction:column;gap:var(--s6)}
+.login .panel h2{font-size:var(--t-2xl)}
+.login .panel .sub{color:var(--ink2);margin-top:6px}
+.login form{display:flex;flex-direction:column;gap:var(--s4)}
+.login .demo{display:flex;flex-direction:column;gap:var(--s3);padding:var(--s4);border-radius:var(--r-card);background:var(--sunken)}
+.login .demo .row{flex-wrap:wrap}
+.login .demo small{color:var(--ink2)}
+.len-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+.len-pick .seg{display:flex}.len-pick .seg button{flex:1;display:flex;flex-direction:column;gap:0;padding:8px 4px;line-height:1.15}
+.len-pick .seg button small{font-weight:600}
+.len-pick{display:block}
+.success-card{display:flex;flex-direction:column;gap:var(--s4)}
+@media (max-width:900px){
+  .login{grid-template-columns:1fr}
+  .login .hero{min-height:230px}
+  .login .hero .copy{padding:var(--s6) var(--s6) 0}
+  .login .hero .brandmark{margin-bottom:var(--s4)}
+  .login .hero h1{font-size:var(--t-xl)}.login .hero p{display:none}
+  .login .pane{padding:var(--s6) var(--s4) var(--s10)}
+}
+@media (max-width:900px){.login .demo .chip{min-height:44px}}
+
+.login .hero>svg.scene-m{display:none}
+@media (max-width:900px){.login .hero>svg.scene-d{display:none}.login .hero>svg.scene-m{display:block}.login .hero{min-height:236px;height:236px}.login .hero .copy{padding-top:18px}.login .hero .brandmark{margin-bottom:12px}}
+
+.privlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:var(--t-sm);color:var(--ink2)}
+.privlist li{display:flex;gap:10px;align-items:flex-start}.privlist .ic{margin-top:2px;color:var(--ink)}

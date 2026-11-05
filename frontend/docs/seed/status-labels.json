@@ -1,0 +1,38 @@
+[
+  {
+    "id": "good",
+    "label": "On track",
+    "tone": "good",
+    "icon": "circle-check"
+  },
+  {
+    "id": "watch",
+    "label": "Keep an eye",
+    "tone": "warn",
+    "icon": "eye"
+  },
+  {
+    "id": "attention",
+    "label": "Needs attention",
+    "tone": "bad",
+    "icon": "triangle-alert"
+  },
+  {
+    "id": "new",
+    "label": "New on the app",
+    "tone": "info",
+    "icon": "sprout"
+  },
+  {
+    "id": "invited",
+    "label": "Invite sent",
+    "tone": "info",
+    "icon": "mail"
+  },
+  {
+    "id": "none",
+    "label": "Not invited",
+    "tone": "",
+    "icon": "user-plus"
+  }
+]

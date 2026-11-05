@@ -1,0 +1,110 @@
+/* ===== Weekly summaries: patient (phone) and provider (report) ===== */
+.mini{display:block;width:100%;height:auto;overflow:visible}
+.mini .ln{fill:none;stroke:var(--chart);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mini .ar{fill:var(--chart);opacity:.1}
+.mini .pt{fill:var(--chart);stroke:var(--surface);stroke-width:2}
+.mini .gl{stroke:var(--line);stroke-width:1;opacity:.7}
+.mini .tx{fill:var(--ink3);font-size:11px;font-family:var(--font-ui)}
+.mini .tx.now{fill:var(--ink);font-weight:700}
+.daydots{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:var(--s4)}
+.daydots div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--ink2);font-weight:700}
+.daydots i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:2px dashed var(--line);color:var(--surface)}
+.daydots i.on{background:var(--accent);border:2px solid var(--accent);color:var(--on-accent)}
+.daydots i.today{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--edge)}
+.daydots .ic{width:16px;height:16px;stroke-width:3}
+.goalrow{display:flex;flex-direction:column;gap:8px;padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.goalrow:last-child{border-bottom:0}
+.goalrow .t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700;font-size:var(--t-sm)}
+.goalrow .t span{display:flex;gap:8px;align-items:center}
+.pips{display:flex;gap:6px}
+.pips i{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink3);display:block}
+.pips i.on{background:var(--accent);border-color:var(--accent)}
+.pips i.none{border:2px dashed var(--line)}
+.bars7{display:flex;gap:6px;flex-wrap:wrap}
+.hl{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) 0;border-bottom:1px solid var(--line);font-size:var(--t-sm)}
+.hl:last-child{border-bottom:0}
+.hl .ii{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;flex:none}
+.hl b{display:block}
+.rep-top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:1000px){.rep-top{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:var(--s5);display:flex;flex-direction:column;gap:6px}
+.stat .l{color:var(--ink2);font-size:var(--t-sm)}
+.stat .v{font-family:var(--font-ui);font-weight:700;font-size:2.25rem;line-height:1;letter-spacing:-.02em}
+.stat .v small{font-size:var(--t-sm);font-weight:600;color:var(--ink2);margin-left:6px;letter-spacing:0}
+.rep-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:var(--s6);align-items:start}
+@media (max-width:1000px){.rep-grid{grid-template-columns:1fr}}
+.pat{display:flex;gap:var(--s4);padding:var(--s4);background:var(--sunken);border-radius:16px;align-items:flex-start}
+.pat+.pat{margin-top:var(--s3)}
+.pat .ii{width:40px;height:40px;border-radius:50%;background:var(--surface);display:grid;place-items:center;flex:none}
+.pat .tx{flex:1;font-size:var(--t-sm);display:flex;flex-direction:column;gap:4px}
+.pat .tx b{font-size:var(--t-md)}
+.dgrow .pips i{width:14px;height:14px;border-width:2px}
+.dgrow .pips{gap:5px}
+.dgrow .row b,.dgrow .delta{white-space:nowrap}
+.dgrow{display:grid;grid-template-columns:36px minmax(0,1fr) 128px 118px;gap:var(--s3);align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.dgrow:last-child{border-bottom:0}
+.dgrow .dic{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center}
+.dgrow .nm b{display:block;font-size:var(--t-sm)}.dgrow .nm small{color:var(--ink2);font-size:var(--t-xs)}
+@media (max-width:700px){.dgrow{grid-template-columns:36px 1fr}.dgrow>:nth-child(n+3){grid-column:2}}
+
+.mini .bridge{fill:none;stroke:var(--chart);stroke-width:1.5;stroke-dasharray:3 5;stroke-linecap:round;opacity:.7}
+.mini .miss{stroke:var(--ink3);stroke-width:2;stroke-linecap:round}
+.mkey{display:flex;align-items:center;gap:8px;margin-top:var(--s2);font-size:var(--t-xs);color:var(--ink2)}
+
+.minibox svg.mini{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.mini .selb{fill:var(--accent);opacity:.18;stroke:var(--accent);stroke-width:1.5;pointer-events:none}
+.mread{margin-top:var(--s2);min-height:44px;font-size:var(--t-sm)}
+.mread .hint{display:block;color:var(--ink2);font-size:var(--t-xs)}
+.mread .rd{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mread .rs{margin-top:2px}
+
+/* ===== Week screen polish ===== */
+/* one empty circle everywhere: a clear solid edge. Sizes keep a steady ratio: 28 (days) > 18 (cards) > 13 (private goals) */
+.daydots i{width:28px;height:28px;border:2px solid var(--ink3);background:transparent}
+.daydots i.on{background:var(--accent);border-color:var(--accent)}
+.daydots .ic{width:15px;height:15px}
+.pips{gap:5px}
+.pips i{width:18px;height:18px;border:2px solid var(--ink3)}
+.pips i.on{background:var(--accent);border-color:var(--accent)}
+.pips i.none{border:2px solid var(--ink3)}
+.dgrow .pips i{width:14px;height:14px}
+.ppips{gap:5px}
+.ppips i{width:13px;height:13px;border:2px solid var(--ink3)}
+.ppips i.on{background:var(--accent);border-color:var(--accent)}
+.ppips i.none{border:2px solid var(--ink3)}
+/* centered card headings, tighter cards */
+.weekpage .pcard>h2,.weekpage .pcard>.pgh h2{text-align:center}
+.weekpage .pcard>h2{margin-bottom:6px}
+.weekpage .pcard>h2+p{text-align:center}
+.weekpage .pcard>p.muted{text-align:center}
+.weekpage .hl{padding:8px 0;gap:10px}
+.weekpage .hl .ii{width:32px;height:32px}
+.weekpage .hl:first-of-type{padding-top:4px}
+.weekpage .goalrow{padding:10px 0}
+.pgh{position:relative;display:flex;justify-content:center;align-items:center;min-height:32px;margin-bottom:6px}
+.pgh h2{margin:0;font-size:1.0625rem}
+.pgh .pill{position:absolute;left:0;top:50%;transform:translateY(-50%)}
+.ph-head.center{justify-content:center;text-align:center;padding-bottom:6px}
+.ph-head.center .hd{flex:none}
+.ph-head.center h1{white-space:normal;overflow:visible}
+.ph-head.center p{margin-top:6px}
+/* sign out lives at the bottom: dark sky color, white edge, gold only when you hover */
+.weekfoot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:var(--s3)}
+.weekfoot .sharedline{margin:0;flex:1;min-width:0}
+.btn.signout{flex:none;background:var(--pet-ink);color:#f4f6f4;border:1.5px solid rgb(255 255 255 / .88);padding:0 14px;min-height:44px;gap:8px;transition:box-shadow .18s,border-color .18s,background .18s,transform .12s}
+.btn.signout:hover,.btn.signout:focus-visible{background:color-mix(in srgb,var(--pet-ink) 82%,#fff);border-color:var(--edge);box-shadow:0 0 0 3px color-mix(in srgb,var(--edge) 45%,transparent)}
+.btn.signout:active{transform:scale(.97)}
+/* what changed, inside the phone readout */
+.mwhy{margin-top:var(--s2);padding-top:var(--s2);border-top:1px solid var(--line)}
+.mwhy .wr{display:flex;justify-content:space-between;gap:8px;font-size:12px;line-height:1.55}
+.mwhy .wr span{color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mwhy .wr b{font-variant-numeric:tabular-nums;font-weight:700}
+.mwhy .wr.up b{color:var(--good)}.mwhy .wr.down b{color:var(--bad)}.mwhy .wr.flat b{color:var(--ink2)}
+.mwhy .wtitle{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin-bottom:2px}
+
+.mread{min-height:24px}
+.mread .hint{text-align:center}
+.pgh .pill{font-size:12px;padding:3px 9px;gap:4px}
+
+.mwhy .wr.total{margin-top:6px;padding-top:6px;border-top:2px solid var(--ink3);font-weight:700}
+.mwhy .wr.total span{font-weight:700}

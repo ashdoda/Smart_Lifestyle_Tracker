@@ -1,0 +1,26 @@
+{
+  "moods": {
+    "happy": "Happy",
+    "content": "Content",
+    "tired": "Tired",
+    "down": "Down"
+  },
+  "lines": {
+    "happy": [
+      "Pip is bouncing. Today is going well.",
+      "Pip feels proud of you."
+    ],
+    "content": [
+      "Pip is calm and keeping you company.",
+      "Pip is relaxed. A small step would make their day."
+    ],
+    "tired": [
+      "Pip is sleepy. A wind-down tonight would help.",
+      "Pip needs some rest too."
+    ],
+    "down": [
+      "Pip is having a quiet day. You do not have to fix it all today.",
+      "Pip would love a small, easy win."
+    ]
+  }
+}

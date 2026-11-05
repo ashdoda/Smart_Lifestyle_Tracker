@@ -1,0 +1,18 @@
+{
+  "emailRegex": "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/",
+  "passwordRules": [
+    "8 or more characters",
+    "1 capital letter",
+    "1 symbol, like ! or #"
+  ],
+  "privateGoalTitleMaxLength": 60,
+  "privateGoalUnitMaxLength": 16,
+  "privateGoalLimitRange": [
+    0,
+    99
+  ],
+  "scaleRange": [
+    0,
+    10
+  ]
+}

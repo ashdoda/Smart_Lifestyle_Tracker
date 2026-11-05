@@ -1,0 +1,48 @@
+[
+  {
+    "id": "drink",
+    "label": "Drink",
+    "short": "Drink",
+    "icon": "wine",
+    "on": true
+  },
+  {
+    "id": "food",
+    "label": "Unplanned snack",
+    "short": "Snack",
+    "icon": "cookie",
+    "on": true
+  },
+  {
+    "id": "urge",
+    "label": "Craving",
+    "short": "Craving",
+    "icon": "flame",
+    "on": false
+  },
+  {
+    "id": "smoke",
+    "label": "Cigarette",
+    "short": "Smoke",
+    "icon": "cigarette",
+    "on": false
+  },
+  {
+    "id": "intimacy",
+    "label": "Sexual activity",
+    "short": "Intimacy",
+    "icon": "heart",
+    "on": false,
+    "sensitive": true,
+    "note": "Provider decides if this is clinically useful."
+  },
+  {
+    "id": "drip",
+    "label": "Self-harm urge",
+    "short": "Urge",
+    "icon": "droplet",
+    "on": false,
+    "sensitive": true,
+    "note": "If used, show crisis resources (988) right away. Confirm with the practitioner first."
+  }
+]
