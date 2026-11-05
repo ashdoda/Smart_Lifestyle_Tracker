@@ -1,0 +1,23 @@
+[
+  {
+    "id": "quick",
+    "name": "Quick",
+    "minutes": 1,
+    "pickerMinutes": "1",
+    "pickerDescription": "One main question. Stop whenever you like."
+  },
+  {
+    "id": "standard",
+    "name": "Standard",
+    "minutes": 3,
+    "pickerMinutes": "3",
+    "pickerDescription": "The main question plus a few follow-ups."
+  },
+  {
+    "id": "extended",
+    "name": "Extended",
+    "minutes": 5,
+    "pickerMinutes": "5",
+    "pickerDescription": "Time to reflect, problem-solve and plan."
+  }
+]
