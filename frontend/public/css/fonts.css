@@ -1,0 +1,10 @@
+/* WHAT THIS FILE DOES */
+/* This file tells the browser where to find the two fonts used in the app, so the text looks the same on every device. */
+/* Fonts: Bricolage Grotesque (headings and numbers) and Atkinson Hyperlegible Next (body text). Both are SIL Open Font License 1.1.
+   Digits 0-9 in the body font are drawn with Bricolage (the second Atkinson rule below). */
+/* Font for headings and numbers */
+@font-face{font-family:"Bricolage Grotesque";font-weight:200 800;font-style:normal;font-display:swap;src:url(../fonts/BricolageGrotesque-latin-wght-normal.woff2) format("woff2")}
+/* Font for normal text */
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:200 800;font-style:normal;font-display:swap;src:url(../fonts/AtkinsonHyperlegibleNext-latin-wght-normal.woff2) format("woff2")}
+/* Numbers 0 to 9 in the normal text use the heading font so they look the same everywhere */
+@font-face{font-family:"Atkinson Hyperlegible Next";font-weight:200 800;font-style:normal;font-display:swap;unicode-range:U+0030-0039;src:url(../fonts/BricolageGrotesque-latin-wght-normal.woff2) format("woff2")}

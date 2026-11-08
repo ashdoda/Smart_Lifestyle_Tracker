@@ -1,0 +1,279 @@
+/* WHAT THIS FILE DOES */
+/* The look of the weekly summary: the phone version for patients and the report version for practitioners */
+/* (small charts, day circles, goal dots, highlights and the stat boxes). */
+/* ===== Weekly summaries: patient (phone) and provider (report) ===== */
+/* The small chart drawing */
+.mini{display:block;width:100%;height:auto;overflow:visible}
+.mini .ln{fill:none;stroke:var(--chart);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mini .ar{fill:var(--chart);opacity:.1}
+.mini .pt{fill:var(--chart);stroke:var(--surface);stroke-width:2}
+.mini .gl{stroke:var(--line);stroke-width:1;opacity:.7}
+.mini .tx{fill:var(--ink3);font-size:11px;font-family:var(--font-ui)}
+.mini .tx.now{fill:var(--ink);font-weight:700}
+/* The seven circles for the days of the week */
+.daydots{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:var(--s4)}
+.daydots div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--ink2);font-weight:700}
+.daydots i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:2px dashed var(--line);color:var(--surface)}
+.daydots i.on{background:var(--accent);border:2px solid var(--accent);color:var(--on-accent)}
+.daydots i.today{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--edge)}
+.daydots .ic{width:16px;height:16px;stroke-width:3}
+/* One row for a goal and how it went */
+.goalrow{display:flex;flex-direction:column;gap:8px;padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.goalrow:last-child{border-bottom:0}
+.goalrow .t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700;font-size:var(--t-sm)}
+.goalrow .t span{display:flex;gap:8px;align-items:center}
+/* Small circles that show how many days a goal was met */
+.pips{display:flex;gap:6px}
+.pips i{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink3);display:block}
+.pips i.on{background:var(--accent);border-color:var(--accent)}
+.pips i.none{border:2px dashed var(--line)}
+.bars7{display:flex;gap:6px;flex-wrap:wrap}
+/* One highlight line (icon and text) */
+.hl{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) 0;border-bottom:1px solid var(--line);font-size:var(--t-sm)}
+.hl:last-child{border-bottom:0}
+.hl .ii{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;flex:none}
+.hl b{display:block}
+/* The row of stat boxes at the top of the report */
+.rep-top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:1000px){.rep-top{grid-template-columns:repeat(2,1fr)}}
+/* One stat box */
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:var(--s5);display:flex;flex-direction:column;gap:6px}
+.stat .l{color:var(--ink2);font-size:var(--t-sm)}
+.stat .v{font-family:var(--font-ui);font-weight:700;font-size:2.25rem;line-height:1;letter-spacing:-.02em}
+.stat .v small{font-size:var(--t-sm);font-weight:600;color:var(--ink2);margin-left:6px;letter-spacing:0}
+/* Two-column layout of the report */
+.rep-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:var(--s6);align-items:start}
+@media (max-width:1000px){.rep-grid{grid-template-columns:1fr}}
+/* A pattern note shown in the report */
+.pat{display:flex;gap:var(--s4);padding:var(--s4);background:var(--sunken);border-radius:16px;align-items:flex-start}
+.pat+.pat{margin-top:var(--s3)}
+.pat .ii{width:40px;height:40px;border-radius:50%;background:var(--surface);display:grid;place-items:center;flex:none}
+.pat .tx{flex:1;font-size:var(--t-sm);display:flex;flex-direction:column;gap:4px}
+.pat .tx b{font-size:var(--t-md)}
+.dgrow .pips i{width:14px;height:14px;border-width:2px}
+.dgrow .pips{gap:5px}
+.dgrow .row b,.dgrow .delta{white-space:nowrap}
+/* One row per area in the report */
+.dgrow{display:grid;grid-template-columns:36px minmax(0,1fr) 128px 118px;gap:var(--s3);align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.dgrow:last-child{border-bottom:0}
+.dgrow .dic{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center}
+.dgrow .nm b{display:block;font-size:var(--t-sm)}.dgrow .nm small{color:var(--ink2);font-size:var(--t-xs)}
+@media (max-width:700px){.dgrow{grid-template-columns:36px 1fr}.dgrow>:nth-child(n+3){grid-column:2}}
+
+.mini .bridge{fill:none;stroke:var(--chart);stroke-width:1.5;stroke-dasharray:3 5;stroke-linecap:round;opacity:.7}
+.mini .miss{stroke:var(--ink3);stroke-width:2;stroke-linecap:round}
+/* The key under the small chart */
+.mkey{display:flex;align-items:center;gap:8px;margin-top:var(--s2);font-size:var(--t-xs);color:var(--ink2)}
+
+.minibox svg.mini{touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.mini .selb{fill:var(--accent);opacity:.18;stroke:var(--accent);stroke-width:1.5;pointer-events:none}
+/* The reading shown when you tap a day on the small chart */
+.mread{margin-top:var(--s2);min-height:44px;font-size:var(--t-sm)}
+.mread .hint{display:block;color:var(--ink2);font-size:var(--t-xs)}
+.mread .rd{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mread .rs{margin-top:2px}
+
+/* Finishing touches: matching circle sizes, centred headings and tighter cards */
+/* ===== Week screen polish ===== */
+/* one empty circle everywhere: a clear solid edge. Sizes keep a steady ratio: 28 (days) > 18 (cards) > 13 (private goals) */
+.daydots i{width:28px;height:28px;border:2px solid var(--ink3);background:transparent}
+.daydots i.on{background:var(--accent);border-color:var(--accent)}
+.daydots .ic{width:15px;height:15px}
+.pips{gap:5px}
+.pips i{width:18px;height:18px;border:2px solid var(--ink3)}
+.pips i.on{background:var(--accent);border-color:var(--accent)}
+.pips i.none{border:2px solid var(--ink3)}
+.dgrow .pips i{width:14px;height:14px}
+.ppips{gap:5px}
+.ppips i{width:13px;height:13px;border:2px solid var(--ink3)}
+.ppips i.on{background:var(--accent);border-color:var(--accent)}
+.ppips i.none{border:2px solid var(--ink3)}
+/* centered card headings, tighter cards */
+.weekpage .pcard>h2,.weekpage .pcard>.pgh h2{text-align:center}
+.weekpage .pcard>h2{margin-bottom:6px}
+.weekpage .pcard>h2+p{text-align:center}
+.weekpage .pcard>p.muted{text-align:center}
+.weekpage .hl{padding:8px 0;gap:10px}
+.weekpage .hl .ii{width:32px;height:32px}
+.weekpage .hl:first-of-type{padding-top:4px}
+.weekpage .goalrow{padding:10px 0}
+.pgh{position:relative;display:flex;justify-content:center;align-items:center;min-height:32px;margin-bottom:6px}
+.pgh h2{margin:0;font-size:1.0625rem}
+.pgh .pill{position:absolute;left:0;top:50%;transform:translateY(-50%)}
+.ph-head.center{justify-content:center;text-align:center;padding-bottom:6px}
+.ph-head.center .hd{flex:none}
+.ph-head.center h1{white-space:normal;overflow:visible}
+.ph-head.center p{margin-top:6px}
+/* The Sign out button at the bottom of the week screen */
+/* sign out lives at the bottom: dark sky color, white edge, gold only when you hover */
+.weekfoot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:var(--s3)}
+.weekfoot .sharedline{margin:0;flex:1;min-width:0}
+.btn.signout{flex:none;background:var(--pet-ink);color:#f4f6f4;border:1.5px solid rgb(255 255 255 / .88);padding:0 14px;min-height:44px;gap:8px;transition:box-shadow .18s,border-color .18s,background .18s,transform .12s}
+.btn.signout:hover,.btn.signout:focus-visible{background:color-mix(in srgb,var(--pet-ink) 82%,#fff);border-color:var(--edge);box-shadow:0 0 0 3px color-mix(in srgb,var(--edge) 45%,transparent)}
+.btn.signout:active{transform:scale(.97)}
+/* The "what changed" text inside the reading */
+/* what changed, inside the phone readout */
+.mwhy{margin-top:var(--s2);padding-top:var(--s2);border-top:1px solid var(--line)}
+.mwhy .wr{display:flex;justify-content:space-between;gap:8px;font-size:12px;line-height:1.55}
+.mwhy .wr span{color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mwhy .wr b{font-variant-numeric:tabular-nums;font-weight:700}
+.mwhy .wr.up b{color:var(--good)}.mwhy .wr.down b{color:var(--bad)}.mwhy .wr.flat b{color:var(--ink2)}
+.mwhy .wtitle{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);margin-bottom:2px}
+
+.mread{min-height:24px}
+.mread .hint{text-align:center}
+.pgh .pill{font-size:12px;padding:3px 9px;gap:4px}
+
+.mwhy .wr.total{margin-top:6px;padding-top:6px;border-top:2px solid var(--ink3);font-weight:700}
+.mwhy .wr.total span{font-weight:700}
+
+.mini .gzl{stroke:var(--good);stroke-width:1.5;stroke-dasharray:5 4;opacity:.8}
+.mini .pt.open{fill:var(--surface);stroke:var(--chart);stroke-width:2}
+.gzkey2{display:inline-block;width:18px;border-top:2px dashed var(--good);margin-right:6px;vertical-align:middle}
+.mkey{flex-wrap:wrap;gap:4px 14px}
+.mkey .lk{display:inline-flex;align-items:center;gap:6px}
+.lkl{display:inline-block;width:20px;border-top:2.5px solid var(--chart)}
+.lkl.dsh{border-top:2px dashed var(--ink2)}
+svg.mini .gzb{fill:var(--good-soft);opacity:.45}
+svg.mini .rl{fill:none;stroke:var(--ink2);stroke-width:1.75;stroke-dasharray:6 4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.pips i.none{border:2px dashed var(--line)}
+.pips i.nochk{border:2px dashed var(--ink3)}
+.daydots .dd{background:none;border:0;padding:0;margin:0;cursor:pointer;border-radius:50%;font:inherit;color:inherit;line-height:0}
+.daydots .dd:focus-visible{outline:3px solid var(--edge);outline-offset:3px}
+.dd-h{font-size:var(--t-sm);margin:var(--s3) 0 var(--s1)}
+.dd-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:var(--s2)}
+.dd-list li{display:flex;flex-direction:column;gap:2px}
+.pat-grp{margin:var(--s3) 0 var(--s2);font-size:var(--t-xs);text-transform:uppercase;letter-spacing:.04em;color:var(--ink2);font-weight:700}
+.pat-grp:first-of-type{margin-top:0}
+
+/* ---- mobile polish: larger week graph, compact card rows ---- */
+.phone .mini .tx{font-size:12.5px}
+.phone .mini .tx.gzt{fill:var(--good);font-weight:700}
+.phone .mini .ln{stroke-width:2.5}.phone .mini .pt{stroke-width:2.5}
+.phone .mkey{font-size:var(--t-sm)}
+.phone .mread{font-size:var(--t-sm)}.phone .mread .hint{font-size:var(--t-sm)}
+.cardrow{display:flex;gap:var(--s3);align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.cardrow:last-of-type{border-bottom:0}
+.cardrow .ci{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;flex:none}
+.cardrow>div{min-width:0}.cardrow b,.cardrow span.muted{display:block;overflow-wrap:break-word}
+.cardrow b{font-size:var(--t-sm)}.cardrow span.muted{font-size:var(--t-sm);margin-top:2px}
+.compact .hl{padding:6px 0}.compact .hl .ii{width:30px;height:30px}
+.weekfoot{padding-bottom:var(--s3)}
+
+/* ===== polish: report, markers, split-circle days ===== */
+.rep-cmp{margin:calc(var(--s3) * -1) 0 0;font-size:var(--t-sm)}
+.stat .l{display:flex;align-items:center;gap:4px}
+.stat .infob{width:36px;height:36px;margin:-8px 0 -8px -4px}
+.stat .chg{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;font-size:var(--t-xs);min-height:24px}
+.dgrow{grid-template-columns:36px minmax(0,1fr) auto}
+.dgrow .nm small{display:block;margin-top:2px}
+@media (max-width:700px){.dgrow{grid-template-columns:36px 1fr}.dgrow>:nth-child(n+3){grid-column:2}}
+.attn{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) var(--s4);border-radius:14px}
+.attn>div{display:flex;flex-direction:column;gap:2px;font-size:var(--t-sm)}
+.attn b{font-size:var(--t-md)}
+.attn.bad{background:var(--bad-soft);color:var(--bad)}
+.attn.ok{background:var(--sunken)}
+.attn.ok .ic{color:var(--good)}
+#repWords li[hidden]{display:none}
+#repMore{margin-top:var(--s3)}
+/* selectable markers */
+.mini .mk{cursor:pointer;outline:none}
+.mini .mk .hit{fill:transparent;stroke:none}
+.mini .mk .pt{transition:r .12s}
+.mini .rpt{fill:var(--surface);stroke:var(--ink2);stroke-width:2;stroke-linejoin:round}
+.mini .rpt.open{stroke-dasharray:2 2}
+.mini .mk:hover .pt,.mini .mk:focus-visible .pt{stroke:var(--edge);stroke-width:3}
+.mini .mk:hover .rpt,.mini .mk:focus-visible .rpt,.mini .mk.on .rpt{fill:var(--ink2);stroke:var(--edge)}
+.mini .mk:focus-visible .hit{stroke:var(--edge);stroke-width:2;stroke-dasharray:3 3}
+.mini .pt{stroke-width:2.5}
+.lkl.dsh{border-top-style:dashed}
+/* split-circle days: left half = morning, right half = evening */
+.daydots .dd{display:flex;align-items:center;justify-content:center;width:100%;max-width:44px;height:44px;margin:0 auto;border-radius:50%;line-height:0}
+.daydots .sc{width:32px;height:32px;display:block}
+.daydots .sc .rim{fill:none;stroke:var(--ink2);stroke-width:2}
+.daydots .sc .h{fill:transparent}
+.daydots .dd[data-s="am"] .h.am,.daydots .dd[data-s="both"] .h.am,.daydots .dd[data-s="pm"] .h.pm,.daydots .dd[data-s="both"] .h.pm{fill:var(--accent)}
+.daydots .dd[data-s="both"] .rim{stroke:var(--accent)}
+.daydots .dl{font-size:12px;font-weight:700;color:var(--ink2);padding:0 2px 2px;border-bottom:2px solid transparent;line-height:1.2}
+.daydots .dl.today{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* patient Week graph: calmer and crisper */
+.mini.gentle .ln{stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.mini.gentle .rl{stroke-width:1.5;stroke-dasharray:4 4;opacity:.55}
+.mini.gentle .pt{r:4.5}
+.mini.gentle .pt.open{stroke-width:2.5}
+.mini.gentle .gl{stroke-opacity:.35}
+.mini.gentle .gzb{opacity:.9}
+.mini.gentle .tx{font-size:12px}
+.mini.gentle .tx.now{font-weight:700}
+.mkey .gzsw{display:inline-block;width:16px;height:10px;border-radius:3px;background:var(--accent-soft);border:1px solid var(--line);margin-right:6px;vertical-align:-1px}
+/* patient graph labels: readable, with a halo so they stay clear of lines and the band */
+.mini.gentle .tx{font-size:13px;fill:var(--ink2)}
+.mini.gentle .tx.vl{font-size:13px;font-weight:600;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.mini.gentle .tx.vl.now{font-weight:800}
+.mini.gentle .gl{stroke-opacity:.5}
+
+/* ===== weekly report: chart beside Attention and Written responses; Domains below ===== */
+.rep-row{display:flex;gap:24px;align-items:flex-start}
+.rep-chart{flex:none;min-width:0}
+.rep-side{flex:1 1 340px;min-width:340px;display:flex;flex-direction:column;gap:24px}
+.rep-words .wscroll{max-height:300px;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;margin:0;scrollbar-width:thin}
+.rep-words .wscroll:focus-visible{outline:3px solid var(--edge);outline-offset:2px;border-radius:12px}
+.rep-words .ci li{gap:4px}
+.rep-words .ci li .h{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:var(--t-xs);font-weight:700}
+.rep-words .ci small{font-size:var(--t-xs);line-height:1.35;overflow-wrap:break-word}
+.rep-words .ci q{display:block;color:var(--ink);font-size:var(--t-sm);overflow-wrap:break-word}
+.rd-sub{font-size:var(--t-xs);margin:2px 0 var(--s3)}
+.rdlist{display:flex;flex-direction:column}
+.rdrow{display:grid;grid-template-columns:32px 220px minmax(160px,1fr) 56px 112px 150px;gap:16px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.rdrow:first-child{border-top:0}
+.rdrow .dic{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center}
+.rdrow .dic .ic{width:16px;height:16px}
+.rdrow .nm{font-size:var(--t-sm);line-height:1.25}
+.rdrow .track{height:6px}
+.rdrow .avg{font-weight:700;font-size:var(--t-sm);text-align:right}
+.rdrow .chg{display:flex;align-items:center;font-size:var(--t-xs);white-space:nowrap}
+.rdrow .gzd{font-size:var(--t-xs);color:var(--ink2);white-space:nowrap}
+.rdrow .gzd b{color:var(--ink)}
+@media (max-width:1100px){.rep-row{flex-direction:column}.rep-chart,.rep-side{width:100%;min-width:0}}
+/* Domains this week sits under the chart and follows its width */
+.rep-left{flex:none;display:flex;flex-direction:column;gap:24px;width:min-content;max-width:100%}
+.rep-doms{padding:16px 20px;container-type:inline-size;min-width:0}
+.rep-doms .rd-sub{margin:0 0 6px}
+.rep-doms .rdrow{grid-template-columns:28px minmax(110px,max-content) minmax(48px,1fr) 44px max-content max-content;gap:12px;padding:8px 0}
+.rep-doms .rdrow .dic{width:28px;height:28px}
+.rep-doms .rdrow .dic .ic{width:14px;height:14px}
+.rep-doms .rdrow .nm{white-space:nowrap}
+@container (max-width:520px){
+  .rep-doms .rdrow{grid-template-columns:28px minmax(0,1fr) 44px max-content;row-gap:4px}
+  .rep-doms .rdrow .track{grid-column:2/-1;grid-row:2}
+  .rep-doms .rdrow .gzd{grid-column:2/-1;grid-row:3}
+}
+@media (max-width:1100px){.rep-left{width:100%}}
+/* rows share one set of columns so bars and numbers line up */
+.rep-doms .rdlist{display:grid;grid-template-columns:28px max-content minmax(48px,1fr) 44px max-content max-content;column-gap:14px}
+.rep-doms .rdrow{grid-column:1/-1;grid-template-columns:subgrid;column-gap:normal;row-gap:0}
+@container (max-width:520px){
+  .rep-doms .rdlist{grid-template-columns:28px minmax(0,1fr) 44px max-content}
+  .rep-doms .rdrow{row-gap:4px}
+}
+/* bar stops at a comfortable length; numbers stay right-aligned at any width */
+.rep-doms .rdlist{grid-template-columns:28px max-content minmax(48px,260px) minmax(0,1fr) 44px max-content max-content}
+.rep-doms .rdrow .avg{grid-column:5}.rep-doms .rdrow .chg{grid-column:6}.rep-doms .rdrow .gzd{grid-column:7}
+@container (max-width:520px){
+  .rep-doms .rdlist{grid-template-columns:28px minmax(0,1fr) 44px max-content}
+  .rep-doms .rdrow .avg{grid-column:3}.rep-doms .rdrow .chg{grid-column:4}
+  .rep-doms .rdrow .track,.rep-doms .rdrow .gzd{grid-column:2/-1}
+}
+
+/* ===== weekly report layout: side / below / stack (set by week.js from the chart width) ===== */
+.rep-row{display:grid;gap:24px;align-items:start}
+.rep-row[data-mode="side"]{grid-template-columns:var(--chw,620px) minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"chart side" "doms side"}
+.rep-row[data-mode="below"]{grid-template-columns:minmax(0,1.3fr) minmax(320px,1fr);grid-template-areas:"chart chart" "doms side"}
+.rep-row[data-mode="stack"]{grid-template-columns:minmax(0,1fr);grid-template-areas:"chart" "doms" "side"}
+.rep-row .rep-chart{grid-area:chart;min-width:0}
+.rep-row .rep-doms{grid-area:doms;width:auto;min-width:0}
+.rep-row .rep-side{grid-area:side;min-width:0;flex:none}
+.rep-row[data-mode="side"] .rep-side{grid-row:1/3}
+@media (max-width:1100px){.rep-row{flex-direction:initial}.rep-chart,.rep-side{width:auto}}
+@container (max-width:520px){.rep-doms .rdrow .nm{white-space:normal}}
