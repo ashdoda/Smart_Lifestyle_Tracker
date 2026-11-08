@@ -1,0 +1,16 @@
+{
+ "name": "lifestyle-tracker",
+ "version": "1.0.0",
+ "private": true,
+ "type": "module",
+ "scripts": {
+  "dev": "vite --host 127.0.0.1",
+  "build": "vite build",
+  "test": "node --test src/*.test.js && node tests/ui/run.mjs",
+  "test:unit": "node --test src/*.test.js",
+  "test:ui": "node tests/ui/run.mjs"
+ },
+ "dependencies": {
+  "vite": "^7.0.0"
+ }
+}

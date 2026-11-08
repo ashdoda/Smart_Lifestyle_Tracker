@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- Practitioner page: one patient -->
+<!-- This page shows one patient in detail: their score chart, daily answers and domains. -->
+<!-- The page itself is almost empty. The scripts at the bottom fill in the page when it loads. -->
+<html lang="en" data-theme="sage">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Provider: patient page - Lifestyle Tracker prototype</title>
+<meta name="theme-color" content="#EEF1EC">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lifestyle Tracker">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<!-- Remembers the chosen colour theme from last time and applies it before the page shows -->
+<script>try{var t=JSON.parse(localStorage.getItem('hk.theme'));if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<!-- Style files (fonts, colours and the look of each part of the app) -->
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/themes.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/pet.css">
+<link rel="stylesheet" href="css/login.css">
+<link rel="stylesheet" href="css/provider.css">
+<link rel="stylesheet" href="css/patient-page.css">
+<link rel="stylesheet" href="css/cards.css">
+<link rel="stylesheet" href="css/phone.css">
+<link rel="stylesheet" href="css/week.css">
+</head>
+<body data-page="provider-patient.html">
+<!-- Empty box. The scripts below draw the whole page in here -->
+<div id="app"></div>
+<!-- Script files, loaded in this order. Each one adds a piece of the app -->
+<script src="js/hk-data.js"></script>
+<script src="js/hk-boot.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/core.js"></script>
+<script src="js/data.js"></script>
+<script src="js/pet.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/login.js"></script>
+<script src="js/provider.js"></script>
+<script src="js/patient-page.js"></script>
+<script src="js/checkin.js"></script>
+<script src="js/patient-app.js"></script>
+<script src="js/week.js"></script>
+<script src="js/hk-state.js"></script>
+<script src="js/main.js"></script>
+<!-- Talks to the server to load the real data -->
+<script type="module" src="/src/hk-backend.js"></script>
+</body>
+</html>
