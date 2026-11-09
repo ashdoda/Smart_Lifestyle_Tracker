@@ -45,7 +45,7 @@ window.HKL.insights = async (rec, count = 14, wordDays = 7) => {
   const conf = [], pconf = [], words = [];
   for (const [i, k] of days.entries()) {
     const a = (await request(`/patients/${rec.backend.patientId}/days/${k}`)).answers || {};
-    if (typeof a['G-M1'] === 'number') (i < 7 ? conf : pconf).push(a['G-M1']);
+    if (typeof a['GM5'] === 'number') (i < 7 ? conf : pconf).push(a['GM5']);
     if (i < wordDays) for (const [id, v] of Object.entries(a)) {
       const q = byId[id];
       if (q && q.type === 'text' && filled(v)) words.push({date: k, period: q.period, card: DOMAIN_TO_CARD[q.domain] || null, question: q.text, text: String(v)});

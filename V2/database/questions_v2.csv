@@ -1,0 +1,96 @@
+question_id,domain,text,answer_type,options,slot,parent_id,show_if,is_bold,default_graded,score_rule,score_day,assigned_only,scope,sort_order
+GM5,general,How confident am I that I can accomplish this goal today (0-10)?,scale10,0-10,morning,,,1,1,scale10,same,0,clinic,1
+GM6,general,Would I like to adjust today's goal to make it more achievable?,yes_no,Yes|No,morning,GM5,<=4,0,0,,same,0,clinic,2
+GM1,general,"What is one specific, measurable thing I will do today to work toward my goal, and when and where will I do it?",text,,morning,,,0,0,,same,0,clinic,3
+GM2,general,What is one small action I can take today that moves me toward my goal?,text,,morning,,,0,0,,same,0,clinic,4
+GM3,general,Why does this matter to me today?,text,,morning,,,0,0,,same,0,clinic,5
+GM4,general,"What is most likely to get in the way, and what will I do if it happens?",text,,morning,,,0,0,,same,0,clinic,6
+GE0,general,How content was I today? (0-10),scale10,0-10,evening,,,1,1,scale10,same,0,clinic,7
+GE2,general,Did I meet my goal today?,choice,No|Some|Most|Yes,evening,,,1,1,goal4,same,0,clinic,8
+GE1,general,What did I do today toward my goal? Briefly write down what I did.,text,,evening,,,0,0,,same,0,clinic,9
+GE3,general,"What helped me follow through, and what got in the way?",text,,evening,,,0,0,,same,0,clinic,10
+GE4,general,How did I feel after completing my goal?,choice,Proud|Relieved|Energized|Calm|Neutral,evening,GE2,>=2,0,0,,same,0,clinic,11
+GE5,general,What is one thing I can do tomorrow to make following through easier?,text,,evening,,,0,0,,same,0,clinic,12
+GE6,general,"If a friend were in the same situation, what would I say to encourage them? What could I adjust tomorrow?",text,,evening,GE2,<=1,0,0,,same,0,clinic,13
+PAM1,physical_activity,What is my step target today?,number,,morning,,,1,0,,same,0,clinic,14
+PAM2,physical_activity,What is one fun activity I can do that will get my body moving for at least 10 minutes?,choice,Walk outside|Dance to music|Stretching video|Bike ride|Swim|Yoga|Gym workout,morning,,,1,0,,same,0,clinic,15
+PAM3,physical_activity,When and where will I complete my movement goal?,text,,morning,,,0,0,,same,0,clinic,16
+PAM4,physical_activity,What is my backup plan if I haven't reached my movement goal by this evening?,choice,10-minute walk|Short exercise or stretching video|Dance to 2-3 favorite songs|Movement break between activities|Lower-intensity activity,morning,,,0,0,,same,0,clinic,17
+PAE4,physical_activity,Did I reach my step target today?,yes_no,Yes|No,evening,,,1,1,yes1,same,0,clinic,18
+PAE5,physical_activity,How did I feel after reaching my step target?,choice,Proud|Energized|Calm|Tired|No change,evening,PAE4,=Yes,1,0,,same,0,clinic,19
+PAE6,physical_activity,Did I complete another physical activity today?,yes_no,Yes|No,evening,,,1,0,yes1,same,0,clinic,20
+PAE1,physical_activity,Briefly record what I did and for how long.,text,,evening,PAE6,=Yes,1,1,filled,same,0,clinic,21
+PAE2,physical_activity,How did I feel afterward?,choice,Energized|Calm|Proud|Tired|Sore|No change,evening,PAE6,=Yes,0,0,,same,0,clinic,22
+PAE3,physical_activity,What would I like to try tomorrow?,text,,evening,,,0,0,,same,0,clinic,23
+PAW1,physical_activity,What type of movement felt most manageable or enjoyable this week?,choice,Cycling|Gym Workout|None|Running|Swimming|Walking|Yoga,weekly,,,0,0,,same,0,clinic,24
+PAW2,physical_activity,How can I build on that activity next week?,text,,weekly,,,0,0,,same,0,clinic,25
+DNM1,nutrition,What is one specific nutrition goal I want to accomplish today?,text,,morning,,,1,1,filled,same,0,clinic,26
+DNM2,nutrition,What is one food I could add today to increase my intake of a particular nutrient?,choice,Fiber: oats|Fiber: beans|Protein: eggs|Protein: Greek yogurt|Magnesium: spinach|Magnesium: almonds,morning,,,0,0,,same,0,clinic,27
+DNM3,nutrition,"What could make this goal difficult, and how can I prepare for it?",text,,morning,,,0,0,,same,0,clinic,28
+DNE1,nutrition,What did I eat today? (plate-based log or optional photo log),text,,evening,,,1,1,filled,same,0,clinic,29
+DNE2,nutrition,What nutrition choice am I happy with today?,text,,evening,,,1,1,filled,same,0,clinic,30
+DNE3,nutrition,Did I have difficulty following my plan today?,yes_no,Yes|No,evening,,,1,0,no1,same,0,clinic,31
+DNE3B,nutrition,"What contributed to it? Was it hunger, stress, convenience, or something in my environment? (check all that apply)",multi_choice,Hunger|Stress|Convenience|Environment,evening,DNE3,=Yes,0,0,,same,0,clinic,32
+DNE4,nutrition,What could I change in my environment or meal plan to make tomorrow easier?,text,,evening,,,0,0,,same,0,clinic,33
+DNW1,nutrition,What small nutrition change was easiest to maintain this week?,text,,weekly,,,0,0,,same,0,clinic,34
+DNW2,nutrition,How can I make that change more convenient?,text,,weekly,,,0,0,,same,0,clinic,35
+DNW3,nutrition,Is there a nutrient or food group I would like to focus on next week?,choice,Fiber|Protein|Magnesium|Vegetables|Whole grains|Hydration,weekly,,,0,0,,same,0,clinic,36
+DNW4,nutrition,Can I find one healthy recipe that fits my schedule?,choice,Yes - quick and easy|Yes - needs cooking|Not yet,weekly,,,0,0,,same,0,clinic,37
+MFM5,mindfulness,Will I practice mindfulness today?,yes_no,Yes|No,morning,,,1,1,yes1,same,0,clinic,38
+MFM6,mindfulness,Where will it take place?,choice,At home|At my desk|Outside|In my bedroom|Somewhere quiet,morning,MFM5,=Yes,0,0,,same,0,clinic,39
+MFM7,mindfulness,When will it take place?,choice,Morning|Lunchtime|Afternoon|Evening|Before bed,morning,MFM5,=Yes,0,0,,same,0,clinic,40
+MFM8,mindfulness,How long (minutes)?,number,,morning,MFM5,=Yes,0,0,,same,0,clinic,41
+MFM2,mindfulness,Would I like to schedule a reminder or add the practice to my calendar?,yes_no,Yes|No,morning,,,0,0,,same,0,clinic,42
+MFM3,mindfulness,Why is practicing mindfulness important to me?,text,,morning,,,0,0,,same,0,clinic,43
+MFM4,mindfulness,"Would I like suggestions for guided meditations, breathing exercises, music, or other mindfulness activities?",choice,Guided meditation|Breathing exercise|Music|Mindful walking|Body scan|Grounding exercise,morning,,,0,0,,same,0,clinic,44
+MFE3,mindfulness,How calm or alert do I feel right now on a scale of 0-10?,scale10,0-10,evening,,,1,1,scale10,same,0,clinic,45
+MFE1,mindfulness,"Did I practice mindfulness today? If so, what did I do and for how long?",text,,evening,,,0,0,,same,0,clinic,46
+MFE2,mindfulness,Did I notice any moments when I was functioning on autopilot or experiencing rumination?,yes_no,Yes|No,evening,,,0,0,,same,0,clinic,47
+MFE4,mindfulness,Was there a moment today when mindfulness helped me respond differently to stress?,text,,evening,,,0,0,,same,0,clinic,48
+MFW1,mindfulness,Which mindfulness practice helped me feel more present?,choice,Guided meditation|Breathing exercise|Mindful walking|Body scan|Grounding exercise,weekly,,,0,0,,same,0,clinic,49
+MFW2,mindfulness,When would it be easiest to repeat that practice?,text,,weekly,,,0,0,,same,0,clinic,50
+MFW3,mindfulness,Are there other forms of mindfulness or meditation I would like to explore?,choice,Guided meditation|Breathing exercises|Mindful walking|Body scans|Brief grounding exercises|None right now,weekly,,,0,0,,same,0,clinic,51
+SLM4,sleep,Did I go to bed at the time I set up for myself last night?,yes_no,Yes|No,morning,,,1,1,yes1,previous,0,clinic,52
+SLM1,sleep,What time do I want to begin winding down tonight?,time,,morning,,,1,0,,same,0,clinic,53
+SLM2,sleep,What time do I plan to get into bed?,time,,morning,,,1,0,,same,0,clinic,54
+SLM3,sleep,What is one thing I can do today to support my sleep tonight?,choice,No caffeine after 2pm|Dim screens early|Same wake time|Wind-down reminder|Short walk today|Put phone away,morning,,,0,0,,same,0,clinic,55
+SLE1,sleep,Am I putting off going to bed?,yes_no,Yes|No,evening,,,0,0,no1,same,0,clinic,56
+SLE1B,sleep,What is keeping me awake?,choice,Scrolling on my phone|Stress or worry|Not tired|TV or streaming|Work or school,evening,SLE1,=Yes,0,0,,same,0,clinic,57
+SLE2,sleep,Is there anything on my mind that I could write down and set aside for tomorrow?,yes_no,Yes|No,evening,,,0,0,,same,0,clinic,58
+SLE3,sleep,Did my previous bedtime routine seem to help me sleep?,yes_no,Yes|No,evening,,,0,0,yes1,same,0,clinic,59
+SLE4,sleep,What is one thing I can do right now to help myself wind down?,choice,Dim the lights|Put my phone away|Stretch|Breathing exercise|Read|Warm shower,evening,,,0,0,,same,0,clinic,60
+SLW1,sleep,What patterns have I noticed between my daily habits and how rested I feel?,text,,weekly,,,0,0,,same,0,clinic,61
+SLW2,sleep,Which parts of my bedtime routine seem to be most helpful?,choice,Wind-down reminder|Dim screens|Reading|Stretching|Fixed bedtime,weekly,,,0,0,,same,0,clinic,62
+SLW3,sleep,Is there one small change I could make to improve my sleep routine next week?,choice,Earlier wind-down|Phone out of bedroom|Same wake time every day|Less caffeine|App limits at night,weekly,,,0,0,,same,0,clinic,63
+SCM1,social,Who is one person I would like to connect with today?,choice,Family member|Friend|Partner|Coworker or classmate|Peer from support group|Neighbor|No one today,morning,,,1,1,filled,same,0,clinic,64
+SCM2,social,How would I like to connect with them?,choice,Text|Phone call|Face-to-face|Letter,morning,,,0,0,,same,0,clinic,65
+SCM3,social,What is one small action I could take today to strengthen a relationship?,text,,morning,,,0,0,,same,0,clinic,66
+SCE1,social,Did I connect with the person I said I would?,yes_no,Yes|No,evening,,,1,1,yes1,same,0,clinic,67
+SCE2,social,Did I feel... (check all that apply),multi_choice,Supported|Connected|Lonely|Isolated,evening,,,1,0,,same,0,clinic,68
+SCE3,social,Did my interactions today make me feel... (check all that apply),multi_choice,Energized|Drained,evening,,,1,0,,same,0,clinic,69
+SCE4,social,Did I avoid social contact today?,yes_no,Yes|No,evening,,,1,1,no1,same,0,clinic,70
+SCE4B,social,What thoughts or feelings contributed to that decision?,text,,evening,SCE4,=Yes,0,0,,same,0,clinic,71
+SCW1,social,Which relationships help me feel supported?,choice,Family|Friends|Partner|Support group|Coworkers,weekly,,,0,0,,same,0,clinic,72
+SCW2,social,What is one way I could strengthen those connections?,text,,weekly,,,0,0,,same,0,clinic,73
+SCW3,social,Is there someone I would like to reconnect with or spend more time with?,text,,weekly,,,0,0,,same,0,clinic,74
+SUM1,substance_use,What is my substance-use goal today?,choice,Abstain|Reduce use,morning,,,1,1,filled,same,0,clinic,75
+SUM7,substance_use,Do I plan to attend a meeting today?,yes_no,Yes|No,morning,SUM1,=Abstain,0,0,,same,0,clinic,76
+SUM2,substance_use,What is my specific limit or plan?,text,,morning,SUM1,=Reduce use,0,0,,same,0,clinic,77
+SUM3,substance_use,Why does making this change matter to me?,text,,morning,,,0,0,,same,0,clinic,78
+SUM4,substance_use,What triggers am I likely to encounter today?,choice,Stress|Certain people|Certain places|Boredom|Conflict|None expected,morning,,,0,0,,same,0,clinic,79
+SUM5,substance_use,What could I do instead if I experience an urge to use?,choice,Distraction activity|Grounding technique|Call a support person|Change environment|Wait 15 minutes,morning,,,0,0,,same,0,clinic,80
+SUM6,substance_use,Who could support me in reaching my goal today?,choice,Family member|Friend|Sponsor or peer|Counselor|Partner,morning,,,0,0,,same,0,clinic,81
+SUE1,substance_use,Did I meet my substance-use goal today?,yes_no,Yes|No,evening,,,1,1,yes1,same,0,clinic,82
+SUE2,substance_use,What situations contributed?,choice,Certain people|Certain places|Boredom or free time|Conflict|A social event,evening,SUE1,=No,0,0,,same,0,clinic,83
+SUE5,substance_use,What emotions contributed?,choice,Stress|Anxiety|Sadness|Anger|Loneliness|Boredom,evening,SUE1,=No,0,0,,same,0,clinic,84
+SUE6,substance_use,What triggers contributed?,choice,Strong craving|Seeing others use|Argument|Pain or poor sleep|Payday or extra money,evening,SUE1,=No,0,0,,same,0,clinic,85
+SUE7,substance_use,How much did I drink/use?,text,,evening,SUE1,=No,0,0,,same,0,clinic,86
+SUE4,substance_use,What did I gain today by following my plan?,text,,evening,SUE1,=Yes,0,0,,same,0,clinic,87
+SUE3,substance_use,What coping strategy could I try next time?,choice,Distraction activity|Grounding technique|Call a support person|Change environment|Wait 15 minutes,evening,SUE1,=No,0,0,,same,0,clinic,88
+SUW1,substance_use,What situations increased my risk of using this week?,choice,Stressful days|Being around certain people|Certain places|Boredom or free time|Conflict|No risky situations,weekly,,,0,0,,same,0,clinic,89
+SUW2,substance_use,Which coping strategies or supports were most helpful?,choice,Distraction activities|Grounding techniques|Calling a support person|Changing environments|Peer group,weekly,,,0,0,,same,0,clinic,90
+SUW3,substance_use,What is one adjustment I can make to support my goal next week?,text,,weekly,,,0,0,,same,0,clinic,91
+PV1,provider,How did the strategy my provider and I talked about at my last visit work for me?,text,,weekly,,,0,0,,same,1,clinic,92
+PV2,provider,How strong were my cravings today (0-10)?,scale10,0-10,evening,,,0,0,,same,1,clinic,93
+PV3,provider,Did I use my wind-down reminder tonight?,yes_no,Yes|No,evening,,,0,0,,same,1,clinic,94
+PV4,provider,How many minutes do I plan to walk today?,number,,morning,,,0,0,,same,1,clinic,95

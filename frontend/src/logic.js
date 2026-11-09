@@ -3,7 +3,12 @@
 // True when an answer actually has something in it (blank, "none" or "n/a" count as empty)
 export function filled(v){return v!=null && (Array.isArray(v)?v.length>0:typeof v==='string'?!['','n/a','na','none','nothing','no','-','null'].includes(v.trim().toLowerCase().replace(/\.$/,'')):true)}
 // True when a question should be shown, based on the answer to an earlier question
-export function visible(q,answers){const c=q.show_if;if(!c)return true;return 'equals' in c?answers[c.question]===c.equals:c.filled?filled(answers[c.question]):true}
+export function visible(q,answers){const c=q.show_if;if(!c)return true;const a=answers[c.question];
+  if('equals' in c)return a===c.equals;
+  if('in' in c)return c.in.includes(a);
+  if('lte' in c)return typeof a==='number'&&a<=c.lte;
+  if('gte' in c)return typeof a==='number'&&a>=c.gte;
+  return c.filled?filled(a):true}
 // A save replaces the whole period, so carry forward unchanged saved answers.
 // Builds the answers to send when saving, keeping earlier answers that were not changed
 export function submission(questions,saved,edits,context={}){const combined={...saved,...edits};return Object.fromEntries(questions.filter(q=>visible(q,{...context,...combined})&&combined[q.id]!=null).map(q=>[q.id,combined[q.id]]))}
