@@ -38,3 +38,9 @@ def calendar_today() -> date:
 def checkin_today(day_start_hour: int = 4) -> date:
     """A check-in day runs from 4 AM to 4 AM, so at 2 AM it is still 'yesterday'."""
     return (now() - timedelta(hours=day_start_hour)).date()
+
+
+# seed_demo.py writes the watch data onto real dates (365 days back to 35 days ahead), so the route returns what is stored.
+# Optional: TRACKER_FITNESS_REPLAY=1 makes the route instead hand any requested day (even beyond the stored window) one of the
+# patient's watch days, chosen the same way every time. Useful with a database whose watch data has run out.
+FITNESS_REPLAY = os.environ.get("TRACKER_FITNESS_REPLAY", "0") == "1"

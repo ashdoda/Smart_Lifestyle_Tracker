@@ -84,10 +84,9 @@ CREATE TABLE daily_scores (
   computed_at TEXT NOT NULL,
   PRIMARY KEY (patient_id, day));
 
-CREATE TABLE fitness_records (                 -- watch data, same as V1 (several rows per user-day exist in the source)
-  record_id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, date TEXT NOT NULL, steps INTEGER, calories_burned REAL, distance_km REAL,
-  active_minutes INTEGER, sleep_hours REAL, heart_rate_avg INTEGER, workout_type TEXT,
-  weather_conditions TEXT, location TEXT, mood TEXT);
+CREATE TABLE fitness_records (                 -- watch data: steps only (the Kaggle file has more columns, not needed by the app)
+  record_id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, date TEXT NOT NULL, steps INTEGER,
+  UNIQUE (user_id, date));
 
 -- ---- views: graph line and practitioner flags ----
 -- What the PATIENT sees: only the rolling line and whether it is in the green zone. No daily score.

@@ -304,3 +304,135 @@ def test_day_answers_route(client, plain):
     put(client, plain, "2026-11-10", "morning", {"GM5": 6, "GM1": "Walk 5000 steps"})
     d = client.get(f"/patients/{plain}/days/2026-11-10").json()
     assert d["answers"] == {"GM5": 6, "GM1": "Walk 5000 steps"} and d["checkins_done"] == ["morning"]
+
+
+def _watch_patient(client):
+    import sqlite3
+    from app import config
+    con = sqlite3.connect(config.DB_PATH)
+    con.execute("INSERT INTO fitness_records (user_id, date, steps) VALUES (7, '2020-01-01', 5000), (7, '2020-01-02', 9000)")
+    con.commit(); con.close()
+    pid = client.post("/patients", json={"first_name": "W", "last_name": "Watch"}).json()["patient_id"]
+    con = sqlite3.connect(config.DB_PATH)
+    con.execute("UPDATE patients SET fitness_user_id = 7 WHERE patient_id = ?", (pid,))
+    con.commit(); con.close()
+    return pid
+
+
+def test_fitness_real_dates(client):
+    pid = _watch_patient(client)
+    d = client.get(f"/patients/{pid}/fitness?start=2020-01-01&end=2020-01-05").json()
+    assert d["replayed"] is False and [x["date"] for x in d["days"]] == ["2020-01-01", "2020-01-02"]
+    assert d["days"][0] == {"date": "2020-01-01", "steps": 5000}
+    other = client.post("/patients", json={"first_name": "N", "last_name": "W"}).json()["patient_id"]
+    assert client.get(f"/patients/{other}/fitness").json()["has_watch_data"] is False
+
+
+def test_fitness_replay_puts_data_on_today_and_the_future(client, monkeypatch):
+    from app import config
+    monkeypatch.setattr(config, "FITNESS_REPLAY", True)
+    pid = _watch_patient(client)                                   # clock is 2026-11-10
+    d = client.get(f"/patients/{pid}/fitness?start=2026-11-10&end=2026-11-14").json()
+    assert d["replayed"] is True and [x["date"] for x in d["days"]] == [f"2026-11-{n}" for n in range(10, 15)]
+    assert all(x["steps"] in (5000, 9000) for x in d["days"])
+    assert [x["source_day"] for x in d["days"]][::2] == [d["days"][0]["source_day"]] * 3       # alternates between the two real days
+    again = client.get(f"/patients/{pid}/fitness?start=2026-11-10&end=2026-11-10").json()["days"][0]
+    assert again == d["days"][0]                                   # same day, same numbers
+
+
+# ---------------------------------------------------------------- step goal decided by the watch
+def _watch(client, steps_by_day):
+    import sqlite3
+    from app import config
+    pid = client.post("/patients", json={"first_name": "S", "last_name": "Steps", "enrolled_on": "2026-11-01", "domains": ["physical_activity"]}).json()["patient_id"]
+    con = sqlite3.connect(config.DB_PATH)
+    con.execute("UPDATE patients SET fitness_user_id = 99 WHERE patient_id = ?", (pid,))
+    for d, s in steps_by_day.items():
+        con.execute("INSERT OR REPLACE INTO fitness_records (user_id, date, steps) VALUES (99, ?, ?)", (d, s))
+    con.commit(); con.close()
+    return pid
+
+
+def _set_steps(day, steps):
+    import sqlite3
+    from app import config
+    con = sqlite3.connect(config.DB_PATH)
+    con.execute("UPDATE fitness_records SET steps = ? WHERE user_id = 99 AND date = ?", (steps, day))
+    con.commit(); con.close()
+
+
+def _evening_ids(client, pid, length="full", day="2026-11-10"):
+    return {q["id"]: q for q in client.get(f"/patients/{pid}/checkins/{day}/evening?length={length}").json()["questions"]}
+
+
+def test_goal_reached_skips_the_question_and_asks_how_i_felt(client):
+    pid = _watch(client, {"2026-11-10": 8000})
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5, "PAM1": 6000})
+    for length in ("full", "quick"):
+        ids = _evening_ids(client, pid, length)
+        assert "PAE4" not in ids and "PAE5" in ids and ids["PAE5"]["show_if"] is None
+    ctx = client.get(f"/patients/{pid}/checkins/2026-11-10/evening").json()["context"]
+    assert ctx["steps_today"] == 8000 and ctx["step_target"] == 6000 and ctx["step_goal_reached"] is True
+    r = put(client, pid, "2026-11-10", "evening", {"GE0": 5, "PAE5": "Proud", "PAE1": "Walked the dog for 40 minutes"})
+    assert r.status_code == 200 and r.json()["saved"]["PAE5"] == "Proud"
+    items = {i["question_id"]: i for i in score(client, pid, "2026-11-10")["items"]}
+    assert items["PAE4"]["points"] == 1 and items["PAE4"]["answer"] == "Yes"
+
+
+def test_goal_missed_skips_both_questions_and_scores_minus_one(client):
+    pid = _watch(client, {"2026-11-10": 3000})
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5, "PAM1": 6000})
+    ids = _evening_ids(client, pid)
+    assert "PAE4" not in ids and "PAE5" not in ids
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5})
+    items = {i["question_id"]: i for i in score(client, pid, "2026-11-10")["items"]}
+    assert items["PAE4"]["points"] == -1 and items["PAE4"]["answer"] == "No"
+    assert put(client, pid, "2026-11-10", "evening", {"GE0": 5, "PAE5": "Proud"}).status_code == 422
+
+
+def test_no_steps_that_day_asks_the_question_as_usual(client):
+    pid = _watch(client, {"2026-11-09": 9000})                      # nothing for the 10th
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5, "PAM1": 6000})
+    ids = _evening_ids(client, pid)
+    assert "PAE4" in ids and ids["PAE5"]["show_if"] == {"question": "PAE4", "equals": "Yes"}
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5, "PAE4": "No"})
+    assert {i["question_id"]: i["points"] for i in score(client, pid, "2026-11-10")["items"]}["PAE4"] == -1
+
+
+def test_patient_without_a_watch_is_asked_as_usual(client, patient):
+    ids = _evening_ids(client, patient)
+    assert "PAE4" in ids and ids["PAE5"]["show_if"] == {"question": "PAE4", "equals": "Yes"}
+
+
+def test_no_target_ever_means_not_asked_and_not_graded(client):
+    pid = _watch(client, {"2026-11-10": 9000})
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5})              # no step target entered
+    ids = _evening_ids(client, pid)
+    assert "PAE4" not in ids and "PAE5" not in ids
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5})
+    assert "PAE4" not in {i["question_id"] for i in score(client, pid, "2026-11-10")["items"]}
+
+
+def test_most_recent_earlier_target_is_used(client, clock):
+    pid = _watch(client, {"2026-11-10": 5000})
+    clock.set("2026-11-09T08:00:00")
+    assert put(client, pid, "2026-11-09", "morning", {"GM5": 5, "PAM1": 6000}).status_code == 200
+    clock.set("2026-11-10T08:00:00")
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5})              # nothing entered today: yesterday's 6000 applies
+    assert client.get(f"/patients/{pid}/checkins/2026-11-10/evening").json()["context"]["step_goal_reached"] is False
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5})
+    assert {i["question_id"]: i["points"] for i in score(client, pid, "2026-11-10")["items"]}["PAE4"] == -1
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5, "PAM1": 4000})  # today's own target wins
+    assert client.get(f"/patients/{pid}/checkins/2026-11-10/evening").json()["context"]["step_goal_reached"] is True
+
+
+def test_rescore_follows_the_current_step_data(client):
+    pid = _watch(client, {"2026-11-10": 8000})
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5, "PAM1": 6000})
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5, "PAE5": "Calm"})
+    assert score(client, pid, "2026-11-10")["domains"]["physical_activity"]["score"] == 1
+    _set_steps("2026-11-10", 1000)
+    client.post(f"/admin/patients/{pid}/rescore")
+    d = score(client, pid, "2026-11-10")
+    assert {i["question_id"]: i["answer"] for i in d["items"]}["PAE4"] == "No" and d["domains"]["physical_activity"]["score"] == -1
+    assert "PAE5" not in client.get(f"/patients/{pid}/days/2026-11-10").json()["answers"]

@@ -8,6 +8,9 @@ Rules (as agreed):
                       per rolling 7 days; after that a declined check-in counts every graded question at -1
   no check-in day     no score (left out of the graph)
   previous-day q's    the sleep question answered this morning scores yesterday
+  step goal           for a patient with a watch, "Did I reach my step target today?" (PAE4) is NOT asked: it is worked out from the
+                      day's steps against the latest step target the patient entered (PAM1) and graded like a Yes/No (+1 / -1).
+                      Reaching the goal is what makes the "How did I feel?" question (PAE5) appear. Recomputed on every scoring run.
 Scoring runs one pass per patient (score_patient) so it scales to the full data set.
 """
 import re
@@ -128,6 +131,64 @@ def decline_checkin(con, patient_id, day, slot, via_popup=0):
     return 'free_miss' if free else 'counted_miss'
 
 
+# ---------------------------------------------------------------- step goal from watch steps
+STEP_TARGET_Q, STEP_GOAL_Q, STEP_FEEL_Q = 'PAM1', 'PAE4', 'PAE5'
+
+
+def step_goal(con, patient_id, day):
+    """How the step goal is decided for this patient on this day.
+    None                      -> ask the patient as usual (no watch, no steps that day, or the question isn't switched on)
+    {'target': None, ...}     -> steps exist but the patient has never entered a target: not asked, not graded
+    {'target': t, 'steps': s, 'reached': bool}  -> decided from the watch; PAE4 is not asked."""
+    uid = con.execute('SELECT fitness_user_id FROM patients WHERE patient_id=?', (patient_id,)).fetchone()
+    if not uid or uid[0] is None:
+        return None
+    row = con.execute('SELECT steps FROM fitness_records WHERE user_id=? AND date=?', (uid[0], day)).fetchone()
+    if not row or row[0] is None:
+        return None
+    on = con.execute("""SELECT 1 FROM patient_domains WHERE patient_id=? AND domain='physical_activity' AND enabled=1
+                        AND start_date<=? AND (end_date IS NULL OR end_date>?)""", (patient_id, day, day)).fetchone()
+    off = con.execute('SELECT 1 FROM patient_questions WHERE patient_id=? AND question_id=? AND enabled=0',
+                      (patient_id, STEP_GOAL_Q)).fetchone()
+    if not on or off:
+        return None
+    t = con.execute("""SELECT a.value_numeric FROM answers a JOIN checkins c ON c.checkin_id=a.checkin_id
+                       WHERE c.patient_id=? AND c.slot='morning' AND c.status='completed' AND c.checkin_day<=?
+                         AND a.question_id=? AND a.status='answered' AND a.value_numeric>0
+                       ORDER BY c.checkin_day DESC LIMIT 1""", (patient_id, day, STEP_TARGET_Q)).fetchone()
+    steps = row[0]
+    if not t:
+        return {'target': None, 'steps': steps, 'reached': None}
+    return {'target': t[0], 'steps': steps, 'reached': steps >= t[0]}
+
+
+def apply_step_goal(con, patient_id, first_day=None, last_day=None):
+    """Write the watch-based Yes/No into each completed evening check-in (so scoring and every screen see an ordinary answer).
+    Without a target the question is treated as not asked; when the goal was not reached the 'how did I feel' answer goes."""
+    uid = con.execute('SELECT fitness_user_id FROM patients WHERE patient_id=?', (patient_id,)).fetchone()
+    if not uid or uid[0] is None:
+        return 0
+    evenings = con.execute("""SELECT c.checkin_id, c.checkin_day, c.completed_at FROM checkins c
+                              JOIN fitness_records f ON f.user_id=? AND f.date=c.checkin_day
+                              WHERE c.patient_id=? AND c.slot='evening' AND c.status='completed' AND c.checkin_day BETWEEN ? AND ?""",
+                           (uid[0], patient_id, first_day or '0000-00-00', last_day or '9999-99-99')).fetchall()
+    n = 0
+    for cid, day, done in evenings:
+        g = step_goal(con, patient_id, day)
+        if g is None:
+            continue
+        if g['reached'] is None:
+            con.execute('DELETE FROM answers WHERE checkin_id=? AND question_id IN (?,?)', (cid, STEP_GOAL_Q, STEP_FEEL_Q))
+            continue
+        con.execute("""INSERT INTO answers(checkin_id,question_id,value,value_numeric,status,answered_at) VALUES (?,?,?,NULL,'answered',?)
+                       ON CONFLICT(checkin_id,question_id) DO UPDATE SET value=excluded.value, value_numeric=NULL, status='answered'""",
+                    (cid, STEP_GOAL_Q, 'Yes' if g['reached'] else 'No', done))
+        if not g['reached']:
+            con.execute('DELETE FROM answers WHERE checkin_id=? AND question_id=?', (cid, STEP_FEEL_Q))
+        n += 1
+    return n
+
+
 # ---------------------------------------------------------------- scoring (one pass per patient)
 def load_patient_rows(con, patient_id, first_day=None, last_day=None):
     return con.execute("""
@@ -183,6 +244,8 @@ def score_patient(con, patient_id, store=True, days=None):
     if days:
         first = (date.fromisoformat(min(days)) - timedelta(days=1)).isoformat()
         last = (date.fromisoformat(max(days)) + timedelta(days=1)).isoformat()
+    if store:
+        apply_step_goal(con, patient_id, first, last)
     results, snaps = compute_scores(load_patient_rows(con, patient_id, first, last), skip,
                                     setting(con, 'credit_quick'), setting(con, 'credit_full'))
     if days:

@@ -5,7 +5,7 @@ Builds the V2 SQLite database: schema -> question bank -> synthetic answers -> w
   python3 build_v2_db.py --data synthetic_v2 --fitness fitness_tracker_dataset.csv --out v2.db
 
 --data     folder written by scripts/generate_v2_checkins.py (patients, patient_domains, patient_questions, checkins, answers)
---fitness  the Kaggle CSV (scripts/download_fitness_data.py puts it next to this file); only the patients' rows are loaded
+--fitness  the Kaggle CSV (scripts/download_fitness_data.py puts it next to this file); only the patients' rows, and only user_id, date and steps, are loaded
 Scores are computed by scoring.py, the same code the backend will use (one pass per patient).
 """
 import argparse
@@ -58,6 +58,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--data', required=True)
     ap.add_argument('--fitness')
+    ap.add_argument('--keep-days', type=int, help='keep only the last N days of check-ins and watch data (makes a small sample database)')
     ap.add_argument('--questions', default=os.path.join(HERE, 'questions_v2.csv'))
     ap.add_argument('--out', default=os.path.join(HERE, 'v2.db'))
     args = ap.parse_args()
@@ -94,16 +95,26 @@ def main():
                             ['answer_id', 'checkin_id', 'question_id', 'value', 'value_numeric', 'status', 'answered_at'])
     if args.fitness:
         keep = {r[0] for r in con.execute('SELECT fitness_user_id FROM patients')}
-        batch, k = [], 0
+        days = {}                                    # several readings on one day -> one row (average steps)
         with open(args.fitness, encoding='utf-8-sig') as f:
-            for rid, row in enumerate(csv.DictReader(f), start=1):
-                if int(row['user_id']) in keep:
-                    batch.append((rid, int(row['user_id']), row['date'], row['steps'], row['calories_burned'], row['distance_km'],
-                                  row['active_minutes'], row['sleep_hours'], row['heart_rate_avg'], row['workout_type'],
-                                  row['weather_conditions'], row['location'], row['mood']))
-                if len(batch) >= 100000:
-                    con.executemany('INSERT INTO fitness_records VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', batch); k += len(batch); batch = []
-        con.executemany('INSERT INTO fitness_records VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', batch); n['fitness_records'] = k + len(batch)
+            for row in csv.DictReader(f):
+                u = int(row['user_id'])
+                if u in keep and row['steps'] != '':
+                    days.setdefault((u, row['date']), []).append(float(row['steps']))
+        con.executemany('INSERT INTO fitness_records (user_id, date, steps) VALUES (?,?,?)',
+                        [(u, dt, round(sum(v) / len(v))) for (u, dt), v in sorted(days.items())])
+        n['fitness_records'] = len(days)
+    if args.keep_days:
+        last = con.execute('SELECT MAX(checkin_day) FROM checkins').fetchone()[0]
+        cut = con.execute("SELECT date(?, ?)", (last, f'-{args.keep_days - 1} days')).fetchone()[0]
+        con.execute('DELETE FROM answers WHERE checkin_id IN (SELECT checkin_id FROM checkins WHERE checkin_day < ?)', (cut,))
+        con.execute('DELETE FROM checkins WHERE checkin_day < ?', (cut,))
+        con.execute('DELETE FROM patient_domains WHERE end_date IS NOT NULL AND end_date <= ?', (cut,))
+        flast = con.execute('SELECT MAX(date) FROM fitness_records').fetchone()[0]
+        if flast:
+            con.execute('DELETE FROM fitness_records WHERE date <= date(?, ?)', (flast, f'-{args.keep_days} days'))
+        con.execute('UPDATE patients SET enrolled_on = COALESCE((SELECT MIN(checkin_day) FROM checkins c WHERE c.patient_id = patients.patient_id), enrolled_on)')
+        print(f'kept the last {args.keep_days} days (check-ins from {cut})')
     # the demo "today" = the day after the last check-in in the data, so the missed-days flag means something
     con.execute("UPDATE settings SET value=(SELECT date(MAX(checkin_day),'+1 day') FROM checkins), note='day after the last check-in in this data (the app uses today)' WHERE key='as_of'")
     con.commit()

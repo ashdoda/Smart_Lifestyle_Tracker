@@ -2,7 +2,7 @@
 
 SQLite database for the Smart Lifestyle Tracker V2: questions, check-ins, answers, and the scores the backend computes.
 The database is storage and graphing. The scoring rules live in `scoring.py`, which the backend will import or port.
-All data is synthetic. The watch data is the Kaggle fitness dataset, same as V1.
+All data is synthetic. The watch data is the Kaggle fitness dataset, same as V1, trimmed to user_id, date and steps.
 
 ## Files
 | File | What it is |
@@ -50,3 +50,6 @@ The full build takes about two minutes and makes an ~880 MB `v2.db` (git ignores
 - `questions` has `sort_order` (order inside a domain and slot) and `options` (pipe-separated choices).
 - `scoring.py` is shared: the backend loads this exact file, so the rules live in one place.
   Re-scoring clears old per-answer snapshots first, so switching a question to "not graded" really removes it.
+- `fitness_records` holds only `record_id, user_id, date, steps` (one row per user per day; several readings on a day are averaged).
+- `build_v2_db.py --keep-days 400` keeps only the last 400 days of check-ins and watch data. `sample.db` is built that way (about 15 MB, 50 patients).
+  The backend's `seed_demo.py` then moves the dates so check-ins run 365 days back to yesterday and steps run 365 days back to 35 days ahead.
