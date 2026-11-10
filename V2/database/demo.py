@@ -40,11 +40,11 @@ def build():
     con.row_factory = sqlite3.Row
     con.executescript(open(os.path.join(HERE, 'schema.sql')).read())
     con.executemany('INSERT INTO settings VALUES (?,?,?)', [
-        ('green_min', '4', 'light-green band starts here (70% best / 30% worst)'),
+        ('green_min', '70', 'light-green band starts here (scores run 0 to 100)'),
         ('rolling_days', '7', 'rolling average window'), ('skip_value', '-1', 'skipped / junk / blank answer'),
         ('batch_minutes', '60', 'morning + evening within this gap -> batched flag'),
         ('edit_hours', '24', 'edit window from original completion'), ('day_start_hour', '4', 'check-in day = 4 AM - 4 AM'),
-        ('credit_quick', '0.5', 'completion credit, quick'), ('credit_full', '0.6', 'completion credit, full'),
+        ('credit_quick', '2.5', 'completion credit, quick'), ('credit_full', '3', 'completion credit, full'),
         ('free_miss_days', '7', 'one free miss per slot per rolling window'), ('as_of', '2026-11-08', 'demo "today"'), ('graph_min_days', '1', 'scored days before the patient graph appears')])
     con.executemany('INSERT INTO domains VALUES (?,?,?)', [
         ('general', 'General', 1), ('physical_activity', 'Physical activity', 0), ('social', 'Social', 0)])

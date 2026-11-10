@@ -78,9 +78,9 @@ CREATE TABLE domain_scores (
 
 CREATE TABLE daily_scores (
   patient_id INTEGER NOT NULL, day TEXT NOT NULL,
-  base_score REAL NOT NULL,                    -- mean of domain scores x 10
+  base_score REAL NOT NULL,                    -- 50 + 50 x mean of the domain scores (-1..+1 -> 0..100)
   completion_credit REAL NOT NULL,
-  score REAL NOT NULL,                         -- clamped to -10..+10; this is the graph value
+  score REAL NOT NULL,                         -- 0..100, clamped; this is the graph value
   computed_at TEXT NOT NULL,
   PRIMARY KEY (patient_id, day));
 

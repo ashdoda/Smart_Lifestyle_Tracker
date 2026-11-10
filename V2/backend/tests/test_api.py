@@ -16,7 +16,7 @@ def score(client, pid, day):
 def test_health_and_config(client):
     assert client.get("/health").json() == {"ok": True}
     c = client.get("/config").json()
-    assert c["green_zone_min_graph_value"] == 4 and c["graph_min"] == -10 and c["rolling_average_days"] == 7
+    assert c["green_zone_min_graph_value"] == 70 and c["graph_min"] == 0 and c["graph_max"] == 100 and c["rolling_average_days"] == 7
     assert c["green_zone_min_percent"] == 70.0
 
 
@@ -50,14 +50,14 @@ def test_quick_and_full(client, patient):
 
 # ---------------------------------------------------------------- scoring
 def test_scoring_by_hand(client, plain):
-    # GM5=5 -> 0 ; GE0=10 -> +1 ; GE2='Most' -> +1/3 ; domain mean 0.444 -> base 4.44
+    # GM5=5 -> 0 ; GE0=10 -> +1 ; GE2='Most' -> +1/3 ; domain mean 0.444 -> base 50 + 50*0.444 = 72.2
     assert put(client, plain, "2026-11-10", "morning", {"GM5": 5}).status_code == 200
     r = put(client, plain, "2026-11-10", "evening", {"GE0": 10, "GE2": "Most"})
     assert r.status_code == 200
     d = score(client, plain, "2026-11-10")
     assert d["domains"]["general"]["possible"] == 3
-    assert 4.44 < d["score"] <= 4.44 + 0.6 + 1e-6
-    assert d["graph_value"] == d["score"] and d["percent"] == pytest.approx((d["score"] + 10) * 5, abs=0.1)
+    assert 72.22 < d["score"] <= 72.23 + 3.0 + 1e-6
+    assert d["graph_value"] == d["score"] and d["percent"] == pytest.approx(d["score"], abs=0.1)
     pts = {i["question_id"]: i["points"] for i in d["items"]}
     assert pts["GM5"] == 0 and pts["GE0"] == 1 and pts["GE2"] == pytest.approx(1 / 3, abs=1e-3)
 

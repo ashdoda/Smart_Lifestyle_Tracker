@@ -3,7 +3,7 @@
 Rules (as agreed):
   per graded answer   best +1, worst -1; skipped / junk / blank = -1 (the 'skip_value' setting)
   domain score        mean of its graded answers, morning and evening pooled (-1..+1)
-  day score           mean of domain scores x 10, plus completion credit, clamped to -10..+10
+  day score           0 to 100: 50 + 50 x (mean of the domain scores), plus completion credit (points on the 0-100 scale), clamped to 0..100
   free miss           a declined whole check-in is neutral (its graded questions are left out) once per slot
                       per rolling 7 days; after that a declined check-in counts every graded question at -1
   no check-in day     no score (left out of the graph)
@@ -203,7 +203,7 @@ def load_patient_rows(con, patient_id, first_day=None, last_day=None):
         (patient_id, first_day or '0000-00-00', last_day or '9999-99-99')).fetchall()
 
 
-def compute_scores(rows, skip=-1.0, credit_quick=0.5, credit_full=0.6):
+def compute_scores(rows, skip=-1.0, credit_quick=2.5, credit_full=3.0):
     own_days = {r['checkin_day'] for r in rows if r['cstatus'] in OWN_STATUSES}
     by_domain = defaultdict(lambda: defaultdict(list))        # effective day -> domain -> [points]
     asked, answered, any_full = defaultdict(int), defaultdict(int), defaultdict(bool)
@@ -228,11 +228,11 @@ def compute_scores(rows, skip=-1.0, credit_quick=0.5, credit_full=0.6):
         if not doms:
             continue                                           # everything excluded: left out of the graph
         dom = {k: sum(v) / len(v) for k, v in doms.items()}
-        base = 10 * sum(dom.values()) / len(dom)
+        base = 50 + 50 * sum(dom.values()) / len(dom)          # mean domain score -1..+1 -> 0..100
         factor = credit_full if any_full[day] else credit_quick
         credit = factor * answered[day] / asked[day] if asked[day] else 0.0
         results[day] = {'domains': dom, 'n_graded': {k: len(v) for k, v in doms.items()},
-                        'base': base, 'credit': credit, 'score': max(-10.0, min(10.0, base + credit))}
+                        'base': base, 'credit': credit, 'score': max(0.0, min(100.0, base + credit))}
     return results, snapshots
 
 

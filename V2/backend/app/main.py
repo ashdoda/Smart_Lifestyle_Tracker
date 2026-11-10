@@ -121,7 +121,7 @@ def get_config(con=Depends(get_db)):
     green = float(s["green_min"])
     return {
         "green_zone_min_percent": scoring.to_percent(green), "green_zone_min_graph_value": green,
-        "graph_min": -10, "graph_max": 10,
+        "graph_min": 0, "graph_max": 100,
         "rolling_average_days": int(s["rolling_days"]), "graph_min_days": int(s["graph_min_days"]),
         "alert_after_days_below": config.ALERT_AFTER_DAYS_BELOW, "alert_after_days_missed": config.ALERT_AFTER_DAYS_MISSED,
         "edit_hours": int(s["edit_hours"]), "batch_minutes": int(s["batch_minutes"]), "day_start_hour": int(s["day_start_hour"]),
@@ -567,7 +567,7 @@ def patient_graph(patient_id: int, start: date | None = None, end: date | None =
     days = [d for d in _range(con, p, start.isoformat(), end.isoformat())
             if d["rolling_graph_value"] is not None and first_ok and d["date"] >= first_ok[0]]
     s = db.settings(con)
-    return {"patient_id": patient_id, "green_zone_min_graph_value": float(s["green_min"]), "graph_min": -10, "graph_max": 10,
+    return {"patient_id": patient_id, "green_zone_min_graph_value": float(s["green_min"]), "graph_min": 0, "graph_max": 100,
             "days": [{"date": d["date"], "rolling_graph_value": d["rolling_graph_value"], "in_green_zone": d["rolling_in_green_zone"],
                       "in_progress": d["in_progress"]} for d in days]}
 

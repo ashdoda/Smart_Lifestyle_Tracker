@@ -22,7 +22,7 @@ for t in ('patients', 'patient_domains', 'patient_questions', 'questions', 'chec
     print(f'  {t:<18}{q1(f"SELECT COUNT(*) FROM {t}"):>12,}')
 print('\nIntegrity')
 check(q1('PRAGMA foreign_key_check') is None if False else not rows('PRAGMA foreign_key_check'), 'no foreign-key violations')
-check(q1("SELECT COUNT(*) FROM daily_scores WHERE score < -10 OR score > 10") == 0, 'every daily score is within -10..+10')
+check(q1("SELECT COUNT(*) FROM daily_scores WHERE score < 0 OR score > 100") == 0, 'every daily score is within 0..100')
 check(q1("SELECT COUNT(*) FROM answers a JOIN checkins c USING(checkin_id) WHERE c.status='free_miss'") == 0, 'free-miss check-ins have no answer rows')
 check(q1("SELECT COUNT(*) FROM answers a JOIN checkins c USING(checkin_id) WHERE c.status='counted_miss' AND a.status!='skipped'") == 0, 'counted-miss answers are all skipped')
 check(q1("""SELECT COUNT(*) FROM checkins a JOIN checkins b ON a.patient_id=b.patient_id AND a.slot=b.slot
@@ -39,7 +39,7 @@ WITH eff AS (
          a.points_earned AS pts
   FROM answers a JOIN checkins c USING(checkin_id) JOIN questions q USING(question_id) WHERE a.graded=1),
 dom AS (SELECT patient_id, day, domain, AVG(pts) AS s FROM eff GROUP BY 1,2,3),
-day AS (SELECT patient_id, day, 10*AVG(s) AS base FROM dom GROUP BY 1,2)
+day AS (SELECT patient_id, day, 50+50*AVG(s) AS base FROM dom GROUP BY 1,2)
 SELECT COUNT(*) FROM daily_scores d JOIN day USING(patient_id, day) WHERE ABS(d.base_score - day.base) > 0.01""")
 check(bad == 0, 'stored base scores match an independent SQL recomputation from the stored points')
 
@@ -56,8 +56,8 @@ print('  answer statuses:', rows("SELECT status, COUNT(*) FROM answers GROUP BY 
 
 print('\nScores')
 print('  scored days:', q1('SELECT COUNT(*) FROM daily_scores'), ' patients with a score:', q1('SELECT COUNT(DISTINCT patient_id) FROM daily_scores'))
-print('  daily score by band:', rows("""SELECT CASE WHEN score<-6 THEN '1 below -6' WHEN score<-2 THEN '2 -6..-2' WHEN score<2 THEN '3 -2..+2'
-                                        WHEN score<4 THEN '4 +2..+4' WHEN score<7 THEN '5 +4..+7' ELSE '6 above +7' END b, COUNT(*)
+print('  daily score by band:', rows("""SELECT CASE WHEN score<20 THEN '1 below 20' WHEN score<40 THEN '2 20-40' WHEN score<60 THEN '3 40-60'
+                                        WHEN score<70 THEN '4 60-70' WHEN score<85 THEN '5 70-85' ELSE '6 85+' END b, COUNT(*)
                                  FROM daily_scores GROUP BY 1 ORDER BY 1"""))
 print('  average daily score:', round(q1('SELECT AVG(score) FROM daily_scores'), 2),
       ' average completion credit:', round(q1('SELECT AVG(completion_credit) FROM daily_scores'), 2))
