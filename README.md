@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/pip.svg" alt="Pip, the app's friendly companion" width="180"></p>
+<p align="center"><img src="assets/pip-scene.svg" alt="Pip, the app's friendly companion, on a hill" width="360"></p>
 
 # Smart Lifestyle Tracker for Mental Health
 
