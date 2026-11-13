@@ -1,5 +1,3 @@
-<p align="center"><img src="assets/pip-scene.svg" alt="Pip, the app's friendly companion, on a hill" width="360"></p>
-
 <p align="center">
 
 https://github.com/user-attachments/assets/c974acd0-1ddf-4263-9746-188521cdd718
