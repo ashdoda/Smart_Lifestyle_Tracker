@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/pip.svg" alt="Pip, the app's friendly companion" width="180"></p>
+
 # Smart Lifestyle Tracker for Mental Health
 
 A daily check-in app that turns a morning and an evening reflection into one simple score. Patients see whether they are staying in a healthy "green zone." Practitioners see who is slipping early enough to step in.
