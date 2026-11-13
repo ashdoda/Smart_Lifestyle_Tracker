@@ -102,7 +102,16 @@ def for_checkin(con, patient_id: int, day: str, slot: str, length: str = "full")
     every graded one; full adds the rest. A follow-up appears only when its parent does (and its show_if is met)."""
     bank = load_bank(con)
     out = []
-    for r in patient_questions(con, patient_id, day, slot):
+    goal = scoring.core.step_goal(con, patient_id, day) if slot == "evening" else None
+    rows = patient_questions(con, patient_id, day, slot)
+    if goal is not None:
+        # The watch decides the step goal: PAE4 is not asked. Reaching the goal is what brings up "how did I feel".
+        for r in rows:
+            if r["question_id"] == scoring.core.STEP_FEEL_Q and goal["reached"]:
+                r.update(parent_id=None, show_if=None)
+        rows = [r for r in rows if r["question_id"] != scoring.core.STEP_GOAL_Q
+                and (r["question_id"] != scoring.core.STEP_FEEL_Q or goal["reached"])]
+    for r in rows:
         graded = bool(r["graded_now"])
         if slot != "weekly" and length == "quick" and not (graded or r["is_bold"]):
             continue

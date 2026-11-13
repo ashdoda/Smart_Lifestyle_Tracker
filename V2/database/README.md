@@ -2,7 +2,7 @@
 
 SQLite database for the Smart Lifestyle Tracker V2: questions, check-ins, answers, and the scores the backend computes.
 The database is storage and graphing. The scoring rules live in `scoring.py`, which the backend will import or port.
-All data is synthetic. The watch data is the Kaggle fitness dataset, same as V1.
+All data is synthetic. The watch data is the Kaggle fitness dataset, same as V1, trimmed to user_id, date and steps.
 
 ## Files
 | File | What it is |
@@ -33,7 +33,7 @@ The full build takes about two minutes and makes an ~880 MB `v2.db` (git ignores
 ## Scoring rules (all numbers live in the `settings` table)
 - Each graded answer is worth -1 (worst) to +1 (best): 0-10 answers `(v-5)/5`, goal met No/Some/Most/Yes `-1 / -1/3 / +1/3 / +1`, yes/no `+1/-1`, "filled" questions `+1`.
 - Skipped, blank, N/A or gibberish answers on a graded question are -1.
-- Domain score = mean of its graded answers, morning and evening together. Day score = mean of the domain scores x 10, plus completion credit (0.5 quick, 0.6 full, times answered / asked), clamped to -10..+10.
+- Domain score = mean of its graded answers, morning and evening together. Day score (0 to 100) = 50 + 50 x the mean of the domain scores, plus completion credit (2.5 quick, 3 full, times answered / asked), clamped to 0..100. Green zone starts at 70.
 - A day with no check-in has no score. The sleep question answered this morning scores yesterday.
 - A declined whole check-in is a free miss (neutral, its graded questions are left out) once per slot per rolling 7 days. After that it counts every graded question at -1. A forgotten evening that is never followed by a morning check-in is closed without penalty.
 - Patient graph: `v_patient_graph` (7-day rolling line + in-green flag only). Practitioner: daily score, rolling line, flags (`v_flag_*`).
@@ -50,3 +50,6 @@ The full build takes about two minutes and makes an ~880 MB `v2.db` (git ignores
 - `questions` has `sort_order` (order inside a domain and slot) and `options` (pipe-separated choices).
 - `scoring.py` is shared: the backend loads this exact file, so the rules live in one place.
   Re-scoring clears old per-answer snapshots first, so switching a question to "not graded" really removes it.
+- `fitness_records` holds only `record_id, user_id, date, steps` (one row per user per day; several readings on a day are averaged).
+- `build_v2_db.py --keep-days 400` keeps only the last 400 days of check-ins and watch data. `sample.db` is built that way (about 15 MB, 50 patients).
+  The backend's `seed_demo.py` then moves the dates so check-ins run 365 days back to yesterday and steps run 365 days back to 35 days ahead.

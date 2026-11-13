@@ -3,11 +3,14 @@
 Rules (as agreed):
   per graded answer   best +1, worst -1; skipped / junk / blank = -1 (the 'skip_value' setting)
   domain score        mean of its graded answers, morning and evening pooled (-1..+1)
-  day score           mean of domain scores x 10, plus completion credit, clamped to -10..+10
+  day score           0 to 100: 50 + 50 x (mean of the domain scores), plus completion credit (points on the 0-100 scale), clamped to 0..100
   free miss           a declined whole check-in is neutral (its graded questions are left out) once per slot
                       per rolling 7 days; after that a declined check-in counts every graded question at -1
   no check-in day     no score (left out of the graph)
   previous-day q's    the sleep question answered this morning scores yesterday
+  step goal           for a patient with a watch, "Did I reach my step target today?" (PAE4) is NOT asked: it is worked out from the
+                      day's steps against the latest step target the patient entered (PAM1) and graded like a Yes/No (+1 / -1).
+                      Reaching the goal is what makes the "How did I feel?" question (PAE5) appear. Recomputed on every scoring run.
 Scoring runs one pass per patient (score_patient) so it scales to the full data set.
 """
 import re
@@ -128,6 +131,68 @@ def decline_checkin(con, patient_id, day, slot, via_popup=0):
     return 'free_miss' if free else 'counted_miss'
 
 
+# ---------------------------------------------------------------- step goal from watch steps
+STEP_TARGET_Q, STEP_GOAL_Q, STEP_FEEL_Q = 'PAM1', 'PAE4', 'PAE5'
+
+
+def step_goal(con, patient_id, day):
+    """How the step goal is decided for this patient on this day.
+    None                      -> ask the patient as usual (no watch, or the question isn't switched on)
+                                 (a watch patient with no steps row for the day counts as 0 steps)
+    {'target': None, ...}     -> steps exist but the patient has never entered a target: not asked, not graded
+    {'target': t, 'steps': s, 'reached': bool}  -> decided from the watch; PAE4 is not asked."""
+    uid = con.execute('SELECT fitness_user_id FROM patients WHERE patient_id=?', (patient_id,)).fetchone()
+    if not uid or uid[0] is None:
+        return None
+    row = con.execute('SELECT steps FROM fitness_records WHERE user_id=? AND date=?', (uid[0], day)).fetchone()
+    steps = row[0] if row and row[0] is not None else 0          # no reading that day counts as zero steps
+    on = con.execute("""SELECT 1 FROM patient_domains WHERE patient_id=? AND domain='physical_activity' AND enabled=1
+                        AND start_date<=? AND (end_date IS NULL OR end_date>?)""", (patient_id, day, day)).fetchone()
+    off = con.execute('SELECT 1 FROM patient_questions WHERE patient_id=? AND question_id=? AND enabled=0',
+                      (patient_id, STEP_GOAL_Q)).fetchone()
+    if not on or off:
+        return None
+    t = con.execute("""SELECT a.value_numeric FROM answers a JOIN checkins c ON c.checkin_id=a.checkin_id
+                       WHERE c.patient_id=? AND c.slot='morning' AND c.status='completed' AND c.checkin_day<=?
+                         AND a.question_id=? AND a.status='answered' AND a.value_numeric>0
+                       ORDER BY c.checkin_day DESC LIMIT 1""", (patient_id, day, STEP_TARGET_Q)).fetchone()
+    if not t:
+        return {'target': None, 'steps': steps, 'reached': None}
+    return {'target': t[0], 'steps': steps, 'reached': steps >= t[0]}
+
+
+def apply_step_goal(con, patient_id, first_day=None, last_day=None):
+    """Write the watch-based Yes/No into each completed evening check-in (so scoring and every screen see an ordinary answer).
+    Without a target the question is treated as not asked; when the goal was not reached the 'how did I feel' answer goes.
+    A day with no step reading counts as 0 steps. Returns the days whose automatic answers changed, so the caller can
+    re-score them (a target edit or reset moves every later evening that carries the target forward)."""
+    uid = con.execute('SELECT fitness_user_id FROM patients WHERE patient_id=?', (patient_id,)).fetchone()
+    if not uid or uid[0] is None:
+        return []
+    evenings = con.execute("""SELECT c.checkin_id, c.checkin_day, c.completed_at FROM checkins c
+                              WHERE c.patient_id=? AND c.slot='evening' AND c.status='completed' AND c.checkin_day BETWEEN ? AND ?""",
+                           (patient_id, first_day or '0000-00-00', last_day or '9999-99-99')).fetchall()
+    changed = []
+    for cid, day, done in evenings:
+        before = (con.execute('SELECT value FROM answers WHERE checkin_id=? AND question_id=?', (cid, STEP_GOAL_Q)).fetchone(),
+                  con.execute('SELECT 1 FROM answers WHERE checkin_id=? AND question_id=?', (cid, STEP_FEEL_Q)).fetchone())
+        before = (before[0][0] if before[0] else None, bool(before[1]))
+        g = step_goal(con, patient_id, day)
+        if g is None or g['reached'] is None:                 # switched off, or no target ever entered: nothing automatic stays
+            con.execute('DELETE FROM answers WHERE checkin_id=? AND question_id IN (?,?)', (cid, STEP_GOAL_Q, STEP_FEEL_Q))
+            after = (None, False)
+        else:
+            con.execute("""INSERT INTO answers(checkin_id,question_id,value,value_numeric,status,answered_at) VALUES (?,?,?,NULL,'answered',?)
+                           ON CONFLICT(checkin_id,question_id) DO UPDATE SET value=excluded.value, value_numeric=NULL, status='answered'""",
+                        (cid, STEP_GOAL_Q, 'Yes' if g['reached'] else 'No', done))
+            if not g['reached']:
+                con.execute('DELETE FROM answers WHERE checkin_id=? AND question_id=?', (cid, STEP_FEEL_Q))
+            after = ('Yes' if g['reached'] else 'No', before[1] and g['reached'])
+        if after != before:
+            changed.append(day)
+    return changed
+
+
 # ---------------------------------------------------------------- scoring (one pass per patient)
 def load_patient_rows(con, patient_id, first_day=None, last_day=None):
     return con.execute("""
@@ -142,7 +207,7 @@ def load_patient_rows(con, patient_id, first_day=None, last_day=None):
         (patient_id, first_day or '0000-00-00', last_day or '9999-99-99')).fetchall()
 
 
-def compute_scores(rows, skip=-1.0, credit_quick=0.5, credit_full=0.6):
+def compute_scores(rows, skip=-1.0, credit_quick=2.5, credit_full=3.0):
     own_days = {r['checkin_day'] for r in rows if r['cstatus'] in OWN_STATUSES}
     by_domain = defaultdict(lambda: defaultdict(list))        # effective day -> domain -> [points]
     asked, answered, any_full = defaultdict(int), defaultdict(int), defaultdict(bool)
@@ -167,11 +232,11 @@ def compute_scores(rows, skip=-1.0, credit_quick=0.5, credit_full=0.6):
         if not doms:
             continue                                           # everything excluded: left out of the graph
         dom = {k: sum(v) / len(v) for k, v in doms.items()}
-        base = 10 * sum(dom.values()) / len(dom)
+        base = 50 + 50 * sum(dom.values()) / len(dom)          # mean domain score -1..+1 -> 0..100
         factor = credit_full if any_full[day] else credit_quick
         credit = factor * answered[day] / asked[day] if asked[day] else 0.0
         results[day] = {'domains': dom, 'n_graded': {k: len(v) for k, v in doms.items()},
-                        'base': base, 'credit': credit, 'score': max(-10.0, min(10.0, base + credit))}
+                        'base': base, 'credit': credit, 'score': max(0.0, min(100.0, base + credit))}
     return results, snapshots
 
 
@@ -179,6 +244,10 @@ def score_patient(con, patient_id, store=True, days=None):
     """Score a patient. days=None rescores every day; days=[...] rescores only those days (a day's score depends only
     on its own check-ins and the next morning's previous-day question, so a small window is enough)."""
     skip = setting(con, 'skip_value')
+    if store:
+        stale = apply_step_goal(con, patient_id)              # whole history: a target edit moves every later evening too
+        if days:
+            days = sorted(set(days) | set(stale))
     first = last = None
     if days:
         first = (date.fromisoformat(min(days)) - timedelta(days=1)).isoformat()

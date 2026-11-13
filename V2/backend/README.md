@@ -49,13 +49,17 @@ New in V2:
 
 ## The rules, as implemented
 - Graded answer: best +1, worst -1 (0-10 -> (v-5)/5; goal No/Some/Most/Yes -> -1, -1/3, +1/3, +1). Skipped, blank, N/A or gibberish = -1.
-- Domain score = mean of its graded answers (morning + evening pooled). Day score = mean of domain scores x 10 + completion credit
-  (0.5 quick / 0.6 full x answered/asked), clamped to +-10. A day with no check-in has no score. The sleep question answered this morning scores yesterday.
-- Green zone starts at +4. Rolling average = mean of scored days in the last 7 calendar days.
+- Domain score = mean of its graded answers (morning + evening pooled). Day score (0-100) = 50 + 50 x mean of domain scores + completion credit
+  (2.5 quick / 3 full x answered/asked), clamped to 0..100. A day with no check-in has no score. The sleep question answered this morning scores yesterday.
+- Green zone starts at 70. Rolling average = mean of scored days in the last 7 calendar days.
 - Free miss: declining a whole check-in is neutral once per slot per rolling 7 days; after that every graded question counts -1.
 - Popups: forgotten evening -> offered when the next morning check-in starts (yes = late answer, flagged; no = decline). Missed morning -> offered when the evening starts.
   If the morning check-in is submitted without answering the popup, last night closes with no penalty. Away 3+ days: nothing is counted against them.
 - Edit window: 24 h from the original completion (never moves). Days are 4 AM to 4 AM. Past days are closed, except last night's evening via the popup.
+- Step goal (patients with a watch): "Did I reach my step target today?" (PAE4) is not asked. It is worked out from that day's steps against
+  the latest step target the patient entered (PAM1; today's, else the most recent earlier one) and graded like a Yes/No. Reaching the goal brings up
+  "How did I feel after reaching my step target?" (PAE5), in quick and full. Missed goal: neither is asked. No target ever: neither is asked or graded.
+  No steps that day (or no watch): the question is asked as before. Recomputed on every scoring run, so `POST /admin/rescore` follows the current step data.
 - Flags: late (via popup), batched (morning and evening within 60 min), free miss used, 3 days below green, 3+ days missed.
 
 ## Front end

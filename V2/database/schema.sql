@@ -78,16 +78,15 @@ CREATE TABLE domain_scores (
 
 CREATE TABLE daily_scores (
   patient_id INTEGER NOT NULL, day TEXT NOT NULL,
-  base_score REAL NOT NULL,                    -- mean of domain scores x 10
+  base_score REAL NOT NULL,                    -- 50 + 50 x mean of the domain scores (-1..+1 -> 0..100)
   completion_credit REAL NOT NULL,
-  score REAL NOT NULL,                         -- clamped to -10..+10; this is the graph value
+  score REAL NOT NULL,                         -- 0..100, clamped; this is the graph value
   computed_at TEXT NOT NULL,
   PRIMARY KEY (patient_id, day));
 
-CREATE TABLE fitness_records (                 -- watch data, same as V1 (several rows per user-day exist in the source)
-  record_id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, date TEXT NOT NULL, steps INTEGER, calories_burned REAL, distance_km REAL,
-  active_minutes INTEGER, sleep_hours REAL, heart_rate_avg INTEGER, workout_type TEXT,
-  weather_conditions TEXT, location TEXT, mood TEXT);
+CREATE TABLE fitness_records (                 -- watch data: steps only (the Kaggle file has more columns, not needed by the app)
+  record_id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, date TEXT NOT NULL, steps INTEGER,
+  UNIQUE (user_id, date));
 
 -- ---- views: graph line and practitioner flags ----
 -- What the PATIENT sees: only the rolling line and whether it is in the green zone. No daily score.

@@ -4,7 +4,7 @@ The rules themselves live in database/scoring.py (one copy, shared with the data
   - loads that module (as `core`) and re-scores a patient after every save,
   - reads the stored daily/domain scores back as day objects (percent, graph_value, rolling_*, in_green_zone ...),
   - works out the flags the practitioner sees.
-V2 scores run -10..+10, so percent = (score + 10) * 5 and graph_value is the score itself.
+V2 scores run 0..100, so percent and graph_value are the score itself (score_out_of_10 = score / 10).
 """
 import importlib.util
 from datetime import date, datetime, timedelta
@@ -32,14 +32,14 @@ def rescore(con, patient_id: int, days: list[str] | None = None):
 
 
 def to_percent(score: float) -> float:
-    return round((score + 10) * 5, 1)
+    return round(score, 1)
 
 
 def summary_numbers(score: float | None, green_min: float) -> dict:
     if score is None:
         return {"percent": None, "score_out_of_10": None, "graph_value": None, "in_green_zone": None}
     p = to_percent(score)
-    return {"percent": p, "score_out_of_10": round(p / 10, 2), "graph_value": round(score, 2),
+    return {"percent": p, "score_out_of_10": round(score / 10, 2), "graph_value": round(score, 2),
             "in_green_zone": score >= green_min}
 
 

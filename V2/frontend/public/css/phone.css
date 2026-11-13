@@ -1,0 +1,391 @@
+/* WHAT THIS FILE DOES */
+/* The look of the patient app, which is built like a phone screen: the phone frame (on a computer), the bottom tab bar, */
+/* the Today screen, the pet picture, the day score ring, the check-in questions and the pop-up sheets. */
+/* ===== Patient app: phone frame on desktop, full-bleed on a real phone ===== */
+/* The area that holds the phone frame in the middle of the page */
+.stage{min-height:calc(100dvh - var(--proto-h,52px));display:flex;justify-content:center;align-items:center;gap:var(--s12);padding:var(--s6);flex-wrap:wrap}
+/* The phone frame itself (fixed size on a computer, full screen on a real phone) */
+.phone{width:390px;height:min(844px,calc(100dvh - var(--proto-h,52px) - 48px));min-height:600px;border-radius:52px;border:10px solid #1b211e;background:var(--bg);overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:var(--shadow);flex:none}
+.phone .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:104px;height:28px;border-radius:20px;background:#1b211e;z-index:30}
+/* The top status strip of the phone */
+.pstatus{height:48px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-weight:700;font-size:14px;background:var(--bg)}
+/* The part of the phone that scrolls */
+.pbody{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;position:relative;scrollbar-width:none}
+.pbody::-webkit-scrollbar{display:none}
+/* The bottom tab bar (Today, Check-in, Week) */
+.tabbar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding:6px 8px calc(10px + env(safe-area-inset-bottom,0px));flex:none}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--ink);font-size:12px;font-weight:700;min-height:56px;justify-content:center;border-radius:14px}
+.tabbar a .ti{width:56px;height:30px;border-radius:15px;display:grid;place-items:center;color:var(--edge)}
+.tabbar a[aria-current="page"] .ti{background:var(--accent-soft);color:var(--ink)}
+.tabbar a:hover .ti{background:var(--sunken)}
+.tabbar a .ic{width:22px;height:22px}
+/* The notes box beside the phone on a wide screen */
+.notes{width:340px;display:flex;flex-direction:column;gap:var(--s4);align-self:center}
+.notes .card{padding:var(--s5)}
+.notes h2{font-size:var(--t-lg)}
+.notes ul{margin:var(--s3) 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--ink2);font-size:var(--t-sm)}
+.notes .chips{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s3)}
+/* On a real phone: remove the frame and fill the whole screen */
+@media (max-width:900px){
+  .stage{padding:0;gap:0;display:block}
+  .phone{width:100%;height:calc(100dvh - var(--proto-h,52px));border:0;border-radius:0;box-shadow:none;min-height:0}
+  .phone .island,.pstatus,.notes{display:none}
+}
+
+/* Pieces used on several patient screens: padding, headings and cards */
+/* shared patient-app pieces */
+.pad{padding:var(--s2) var(--s5) var(--s6)}
+.ph-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s3);padding:var(--s2) var(--s5) var(--s4)}
+.ph-head h1{font-size:var(--t-2xl);line-height:1.1}
+.ph-head p{color:var(--ink2);font-size:var(--t-sm);margin-top:4px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:var(--s5)}
+.pcard h2{font-size:var(--t-lg);margin-bottom:var(--s2)}
+.stack{display:flex;flex-direction:column;gap:var(--s4)}
+
+/* The picture of the pet on the hills, with the heart chip and "Say hi" button on top */
+/* pet scene */
+.petscene{position:relative;height:292px;border-radius:var(--r-hero);overflow:hidden;margin:0 var(--s5) var(--s4);background:var(--sky)}
+.petscene>svg:not(.ic){position:absolute;inset:0;width:100%;height:100%}
+.petscene .moodchip{position:absolute;left:12px;top:12px;z-index:2}
+.petscene .hi{position:absolute;right:12px;bottom:12px;z-index:2}
+.petline{margin:0 var(--s5) var(--s4);font-size:var(--t-sm);color:var(--ink2);text-align:center;min-height:1.4em}
+
+/* The ring that shows the day's score and the small area chips under it */
+/* day rating */
+.rating{display:flex;gap:var(--s4);align-items:center}
+.ring{position:relative;width:132px;height:132px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .tr{stroke:var(--sunken);fill:none;stroke-width:12}
+.ring .pg{stroke:var(--chart);fill:none;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .8s var(--ease)}
+.ring .n{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1}
+.ring .n b{font-family:var(--font-display);font-size:2.6rem;letter-spacing:-.03em}
+.ring .n span{font-size:12px;color:var(--ink2);margin-top:2px}
+.rating h2{margin:0}
+.rating p{color:var(--ink2);font-size:var(--t-sm);margin-top:4px}
+.dchips{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--s2);margin-top:var(--s4)}
+.dchip{flex:0 0 calc((100% - 16px) / 3);min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:14px;background:var(--sunken);font-size:12px;font-weight:700;color:var(--ink2)}
+.dchip b{font-size:var(--t-md);color:var(--ink);font-family:var(--font-display)}
+.dchip .ic{width:18px;height:18px;color:var(--ink)}
+.sharedline{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink2);margin-top:var(--s3)}
+
+/* The "next up" box, quick buttons and idea rows */
+/* next up + quick log + ideas */
+.nextup{display:flex;flex-direction:column;gap:var(--s3)}
+.nextup .tag{display:flex;gap:var(--s2);flex-wrap:wrap}
+.qlog{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:var(--s2)}
+.qlog .btn{flex-direction:column;gap:4px;min-height:72px;padding:8px;font-size:var(--t-xs);white-space:normal;text-align:center}
+.idea{display:flex;gap:var(--s3);align-items:center;width:100%;text-align:left;background:var(--surface);border:var(--edge-w) solid var(--edge);border-radius:16px;padding:var(--s3) var(--s4);min-height:64px}
+.idea:hover{background:var(--sunken)}
+.idea .ii{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;flex:none}
+.idea b{display:block;font-size:var(--t-sm)}.idea small{color:var(--ink2)}
+.idea .chev{margin-left:auto;color:var(--edge)}
+
+/* The check-in questions: progress bar, question text, answer buttons, yes/no, slider and summary */
+/* check-in flow */
+.ck-top{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s4) var(--s3)}
+.pbar{flex:1;height:10px;border-radius:5px;background:var(--sunken);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .35s var(--ease)}
+.ck-card{padding:var(--s2) var(--s5) var(--s6);display:flex;flex-direction:column;gap:var(--s5)}
+.ck-card .q{font-family:var(--font-display);font-weight:700;font-size:var(--t-xl);line-height:1.2;letter-spacing:-.015em;text-wrap:balance}
+.ck-card .why{color:var(--ink2);font-size:var(--t-sm)}
+.opts{display:flex;flex-direction:column;gap:var(--s2)}
+.opt-btn{display:flex;align-items:center;gap:var(--s3);width:100%;min-height:var(--h-lg);padding:10px var(--s4);border-radius:14px;border:var(--edge-w) solid var(--edge);background:var(--surface);font-weight:700;text-align:left;font-size:var(--t-md)}
+.opt-btn .rd{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink3);flex:none;display:grid;place-items:center}
+.opt-btn:hover{background:var(--sunken)}
+.opt-btn[aria-pressed="true"]{background:var(--accent-soft)}
+.opt-btn[aria-pressed="true"] .rd{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+.opt-btn .rd .ic{width:14px;height:14px;stroke-width:3;opacity:0}
+.opt-btn[aria-pressed="true"] .rd .ic{opacity:1}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.yn .opt-btn{justify-content:center;min-height:60px;font-size:var(--t-lg)}
+.mood4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+.mood4 .opt-btn{flex-direction:column;gap:4px;justify-content:center;text-align:center;font-size:var(--t-sm);padding:10px 4px;min-height:76px}
+.scalev{display:flex;flex-direction:column;gap:var(--s2)}
+.scalev .val{font-family:var(--font-display);font-size:3rem;font-weight:800;line-height:1;text-align:center}
+.scalev .ends{display:flex;justify-content:space-between;font-size:var(--t-xs);color:var(--ink2)}
+.ck-actions{display:flex;flex-direction:column;gap:var(--s3);margin-top:var(--s2)}
+.ck-actions .row{justify-content:space-between}
+.size-card{display:flex;flex-direction:column;gap:var(--s3)}
+.size-opt{display:flex;gap:var(--s3);align-items:center;width:100%;text-align:left;padding:var(--s4);border-radius:16px;border:var(--edge-w) solid var(--edge);background:var(--surface);min-height:72px}
+.size-opt:hover{background:var(--sunken)}
+.size-opt[aria-pressed="true"]{background:var(--accent-soft)}
+.size-opt .mn{width:48px;height:48px;border-radius:50%;background:var(--sunken);display:grid;place-content:center;text-align:center;line-height:1;font-family:var(--font-display);font-weight:800;font-size:var(--t-lg);flex:none}
+.size-opt .mn small{font-family:var(--font-ui);font-size:11px;font-weight:700}
+.size-opt[aria-pressed="true"] .mn{background:var(--accent);color:var(--on-accent)}
+.size-opt b{display:block}.size-opt span.d{font-size:var(--t-sm);color:var(--ink2)}
+.done-pet{width:200px;margin:0 auto}
+.summary li{display:flex;gap:var(--s3);padding:10px 0;border-bottom:1px solid var(--line);font-size:var(--t-sm)}
+.summary{list-style:none;margin:0;padding:0}
+.summary b{display:block}
+.summary .a{color:var(--ink2)}
+
+/* The sheet that slides up from the bottom of the phone */
+/* bottom sheet inside the phone */
+.sheet-wrap{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none}
+.sheet-scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;transition:opacity .2s;pointer-events:auto}
+.sheet{position:relative;background:var(--surface);border-radius:28px 28px 0 0;padding:var(--s5) var(--s5) var(--s8);max-height:82%;overflow:auto;transform:translateY(100%);transition:transform .28s var(--ease);pointer-events:auto;box-shadow:var(--shadow)}
+.sheet-wrap.in .sheet-scrim{opacity:1}.sheet-wrap.in .sheet{transform:none}
+.sheet .grab{width:44px;height:5px;border-radius:3px;background:var(--line);margin:-8px auto var(--s4)}
+.sheet h2{font-size:var(--t-xl);margin-bottom:var(--s2)}
+.sheet h3{font-size:var(--t-md);margin:var(--s4) 0 var(--s2)}
+.sheet .chips{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.sheet ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:var(--t-sm)}
+
+/* ===== PHONE-FIRST pass: iPhone SE (375x667) is the floor; Samsung 360 wide is the real narrowest. Titles and labels stay on one line ===== */
+.ph-head .hd{min-width:0;flex:1}
+.ph-head h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idea>span:nth-child(2){min-width:0;flex:1}
+.idea b,.idea small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.login .lg-l{display:inline}.login .sm-l{display:none}
+@media (max-width:900px){
+  .phone{padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+  .pbody{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .ph-head{padding:12px 16px 12px}
+  .ph-head h1{font-size:clamp(1.3rem,6.4vw,1.75rem)}
+  .pad{padding:2px 16px 24px}.stack{gap:12px}
+  .petscene{margin:0 16px 10px;height:clamp(200px,34vh,270px);border-radius:24px}
+  .petline{margin:0 16px 12px}
+  .pcard{padding:16px}
+  .pcard h2{font-size:1.0625rem}
+  .rating{gap:12px}.ring{width:104px;height:104px}.ring .n b{font-size:2.1rem}.ring .n span{font-size:11px}
+  .rating h2{white-space:normal;overflow-wrap:anywhere}.rating>div:last-child{min-width:0}
+  .dchips{gap:6px}.dchip{padding:8px 2px}
+  .btn.lg{font-size:var(--t-md);padding:0 14px;min-height:52px}
+  .qlog{grid-template-columns:repeat(3,minmax(0,1fr))}.qlog .btn{font-size:.8125rem;padding:6px 4px}
+  .ck-top{padding:8px 12px}
+  .ck-card{padding:4px 16px 24px;gap:16px}
+  .ck-card .q{font-size:clamp(1.2rem,5.8vw,1.45rem)}
+  .opt-btn{font-size:.9375rem;padding:8px 12px;gap:10px}
+  .mood4{gap:6px}.mood4 .opt-btn{font-size:.8125rem;padding:8px 2px}
+  .yn .opt-btn{font-size:1.0625rem}
+  .size-opt{padding:12px;gap:12px}.size-opt .mn{width:44px;height:44px;font-size:1.1rem}
+  .scalev .val{font-size:2.5rem}
+  .sheet{padding:16px 16px 28px}.sheet h2{font-size:1.25rem}
+  .daydots{gap:4px}.daydots i{width:26px;height:26px}
+  .goalrow .t{font-size:.875rem}
+  .login .hero{min-height:170px}
+  .login .hero .copy{padding:20px 16px 0}
+  .login .hero h1{font-size:clamp(1.2rem,6vw,1.5rem);white-space:nowrap}
+  .login .pane{padding:20px 16px 32px}
+  .login .panel h2{font-size:clamp(1.3rem,6.4vw,1.6rem);white-space:nowrap}
+  .login .lg-l{display:none}.login .sm-l{display:inline}
+  .login .demo .chip{font-size:.8125rem;padding:0 10px}
+}
+@media (max-width:400px){
+  .ring{width:96px;height:96px}.ring .n b{font-size:1.9rem}
+  .qlog .btn{font-size:.75rem}
+  .mood4 .opt-btn{font-size:.75rem}
+}
+@media (max-width:900px) and (max-height:700px){.petscene{height:188px}.pad{padding-bottom:16px}}
+.phone .btn.sm{min-height:44px}
+.phone .link{min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 10px}
+.summary li>span:nth-child(2){min-width:0;flex:1}
+.summary b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:340px){.goalrow .t{font-size:.8125rem}.goalrow .t .num{white-space:nowrap}.opt-btn{font-size:.875rem}.ph-head h1{font-size:1.25rem}}
+.goalrow .t .num{white-space:nowrap}
+.phone .chip.sm{min-height:44px}
+.goalrow .t>span:first-child{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goalrow .t>span:first-child .ic{flex:none}
+
+.privrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.privrow:last-child{border-bottom:0}
+.privrow .t{flex:1;min-width:0}.privrow b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:var(--t-sm)}
+.privrow small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.ppips{display:inline-flex;gap:3px;flex:none}.ppips i{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink3);box-sizing:border-box;display:block}
+.ppips i.on{background:var(--accent);border-color:var(--accent)}.ppips i.none{border:1.5px dashed var(--line)}
+.stepper{display:flex;align-items:center;justify-content:center;gap:24px;margin:var(--s3) 0}
+.stepper .val{font-family:var(--font-display);font-size:3.2rem;font-weight:800;min-width:2.2ch;text-align:center;line-height:1}
+.opt-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.opt-row .t{display:flex;flex-direction:column;font-size:var(--t-sm);min-width:0}.opt-row .t small{color:var(--ink2);font-weight:400}
+
+/* private goals: the goal's own words wrap by whole words and are never cut off */
+.privrow{align-items:center;gap:10px;padding:10px 0}
+.privrow .t{flex:1;min-width:0}
+.privrow b{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;word-break:normal;line-height:1.25;margin-bottom:6px}
+.privrow .ppips{margin-bottom:4px}
+.privrow small{white-space:normal;overflow:visible;line-height:1.3}
+.btn.sm.tight{padding:0 12px;gap:6px;min-width:0;justify-content:center;text-align:center}
+.pcard .eyebrow{font-size:var(--t-xs);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+.pcard h2.goalname{margin:var(--s2) 0 0;white-space:normal;overflow:visible;overflow-wrap:break-word;word-break:normal;line-height:1.2}
+
+/* one private goals card: tight list, one-line names, caret opens the full text */
+.ptitle{display:flex;align-items:center;min-width:0}
+.ptitle .pt{display:block;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:var(--t-sm);line-height:1.3;margin:0}
+.ptitle .pcaret{flex:none;width:44px;height:44px;margin:-8px -12px -8px 0;border:0;background:none;color:var(--edge);display:grid;place-items:center;padding:0;cursor:pointer;transition:transform .15s}
+.ptitle .pcaret.hide{display:none}
+.ptitle.open .pt{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;word-break:normal}
+.ptitle.open .pcaret{transform:rotate(180deg);align-self:flex-start;margin-top:-6px}
+.pgl{list-style:none;margin:var(--s3) 0 0;padding:0}
+.pgl li{padding:10px 0;border-top:1px solid var(--line)}.pgl li:first-child{border-top:0;padding-top:0}
+.pgl .ptitle .pt{font-weight:700}
+.pmeta{display:flex;align-items:center;gap:8px;margin-top:2px;font-size:var(--t-xs);color:var(--ink2)}
+.pmeta .sep{color:var(--ink3)}
+.pill.sm{font-size:11px;padding:2px 8px;min-height:0}
+.privrow .ptitle .pt{font-weight:700;margin-bottom:0}
+
+/* ===== check-in polish ===== */
+.ckbanner{position:relative;height:116px;margin:8px 16px 0;border-radius:24px;overflow:hidden;background:var(--sky)}
+.ckbanner>svg:not(.ic){position:absolute;inset:0;width:100%;height:100%}
+.ncollapse{display:block;padding:0}
+.nc-head{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:var(--s3) var(--s4);background:none;border:0;color:inherit;font:inherit;font-weight:700;text-align:left;cursor:pointer}
+.nc-head .ic{flex:none}
+.nc-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nc-chev{flex:none;display:grid;place-items:center;transition:transform .2s var(--ease)}
+.ncollapse.open .nc-chev{transform:rotate(90deg)}
+.nc-body{margin:0;padding:0 var(--s4) var(--s3) 46px;font-size:var(--t-sm);font-weight:400;color:var(--ink)}
+.size-opt{padding:calc(var(--s4) - 1.5px) var(--s4);min-height:69px}
+@media (max-width:900px){.size-opt{padding:10.5px 12px}}
+.pwrap{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pcount{font-size:12px;font-weight:700;line-height:1;color:var(--ink2);letter-spacing:.02em}
+.pwrap .pbar{width:100%;flex:none}
+.pbar i{position:relative;overflow:hidden;box-shadow:0 0 10px color-mix(in srgb,var(--accent) 55%,transparent)}
+.pbar i::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0,color-mix(in srgb,#fff 70%,transparent) 50%,transparent 100%);transform:translateX(-100%);animation:pbsweep 2.2s ease-in-out infinite}
+@keyframes pbsweep{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
+/* the big buttons: sheen on hover, arrow nudges, press, sparks on click */
+.ck-go{position:relative;overflow:hidden;isolation:isolate;transition:transform .15s var(--ease),box-shadow .2s,background .2s}
+.ck-go .lbl{display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.ck-go .go-arrow{display:inline-grid;transition:transform .2s var(--ease)}
+.ck-go::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 30%,rgb(255 255 255 / .38) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s var(--ease)}
+.ck-go:hover,.ck-go:focus-visible{transform:translateY(-2px);box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent-hover) 88%,#000)}
+.ck-go:hover::before,.ck-go:focus-visible::before{transform:translateX(120%)}
+.ck-go:hover .go-arrow,.ck-go:focus-visible .go-arrow{transform:translateX(5px)}
+.ck-go:active{transform:translateY(0) scale(.97);box-shadow:none}
+.ck-go.popping{animation:ckpop .26s var(--ease)}
+@keyframes ckpop{0%{transform:scale(.96)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+.sparks{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:2}
+.sparks i{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--c);animation:spark .5s ease-out forwards}
+@keyframes spark{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.ck-go .spark{overflow:visible}
+.ck-go .spark .ln{stroke-dasharray:30;stroke-dashoffset:0;transition:stroke-width .2s}
+.ck-go:hover .spark .ln,.ck-go:focus-visible .spark .ln{stroke-width:3.2;animation:sparkdraw 1.1s ease-in-out infinite}
+.ck-go:hover .spark .hd,.ck-go:focus-visible .spark .hd{stroke-width:3.2}
+@keyframes sparkdraw{0%{stroke-dashoffset:30}55%{stroke-dashoffset:0}100%{stroke-dashoffset:-30}}
+@media (prefers-reduced-motion:reduce){.pbar i::after,.ck-go::before{animation:none;display:none}.ck-go:hover .spark .ln{animation:none}.ck-go:hover{transform:none}}
+/* summary lines: question on one line with a caret when long, answers wrap by whole words */
+.summary li>span:nth-child(2){min-width:0;flex:1;overflow-wrap:break-word}
+.summary .ptitle .pt{font-size:var(--t-sm)}
+.summary .a{display:block;margin-top:2px;overflow-wrap:break-word;word-break:normal}
+.summary .ptitle .pcaret{margin-right:0}
+
+/* clipboard icon: a tiny tilt and a spark on hover */
+.ck-go .clip{position:relative;display:inline-grid;transition:transform .25s var(--ease)}
+.ck-go .clip::after{content:'';position:absolute;top:-4px;right:-6px;width:7px;height:7px;border-radius:50%;background:var(--edge);transform:scale(0);opacity:0;transition:transform .25s var(--ease),opacity .25s}
+.ck-go:hover .clip,.ck-go:focus-visible .clip{animation:clipwiggle .7s var(--ease)}
+.ck-go:hover .clip::after,.ck-go:focus-visible .clip::after{transform:scale(1);opacity:1}
+@keyframes clipwiggle{0%{transform:rotate(0)}25%{transform:rotate(-12deg) scale(1.12)}55%{transform:rotate(8deg) scale(1.12)}100%{transform:rotate(0) scale(1)}}
+@media (prefers-reduced-motion:reduce){.ck-go:hover .clip{animation:none}}
+
+/* ---- mobile polish: info buttons, provisional label, saved screen, plain wrapping ---- */
+.infob{display:inline-grid;place-items:center;width:44px;height:44px;margin:-10px -8px -10px 0;border:0;background:none;color:var(--ink2);border-radius:50%;cursor:pointer;flex:none;vertical-align:middle;padding:0}
+.infob:hover{background:var(--sunken)}.infob:focus-visible{outline:3px solid var(--edge);outline-offset:-3px}
+.infob .ic{width:20px;height:20px}
+.pcard .row.between h2{margin:0;min-width:0}
+.rating h2{display:flex;align-items:center;gap:4px;flex-wrap:nowrap}
+.rtext{min-width:0}.rtext h2{font-size:1.125rem}.rtext>p{margin-top:4px}
+.pill.prov{background:var(--warn-soft,var(--sunken));color:var(--ink);border:1px solid var(--line);margin-top:2px}
+.done-pet{width:88px}
+@media (max-height:680px){.done-pet{width:64px}.ck-card h1.q{margin-top:var(--s1)}}
+.ck-card .pcard{margin-top:var(--s2)}
+.summary b,.summary .pt,.summary .ptitle .pt{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word;display:block;font-size:var(--t-sm);line-height:1.3}
+.summary .a{display:block;margin-top:2px;overflow-wrap:anywhere}
+.summary .a.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.summary .more{min-height:44px;padding:0 4px;font-size:var(--t-xs)}
+.pad{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}   /* small gap above the tab bar in the desktop phone frame */
+@media (max-width:900px){.pad{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}}
+.ck-card{padding-bottom:var(--s6)}
+.tag{display:flex;flex-wrap:wrap;gap:6px}
+.dchip{min-width:0;overflow-wrap:break-word}
+
+/* ===== Today: score card (centered number, no ring) ===== */
+.scorecard{position:relative;text-align:center;padding-top:18px;container-type:inline-size}
+.scorecard .sc-info{position:absolute;top:8px;right:8px}
+.scorecard .sc-info .infob{margin:0}
+.sc-label{margin:0;font-size:var(--t-sm);font-weight:700;color:var(--ink2)}
+.sc-num{display:block;margin:6px 0 4px;font-family:var(--font-display);font-size:3.25rem;line-height:1;letter-spacing:-.03em;color:var(--ink)}
+.sc-scale{margin:0;font-size:12px;color:var(--ink2)}
+.sc-sub{margin:2px 0 0;font-size:12px;color:var(--ink2)}
+.scorecard .sharedline{justify-content:center}
+/* domain tiles: two columns on phones, three where the card is wide; one row until "More domains" */
+.dtiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:var(--s4);text-align:left}
+.dtile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ic val" "nm nm" "st st";align-items:center;align-content:start;gap:2px 8px;padding:8px 10px;border-radius:12px;background:var(--sunken);min-width:0}
+.dtile .ic{grid-area:ic;width:16px;height:16px;color:var(--ink2)}
+.dtile b{grid-area:val;justify-self:end;font-family:var(--font-display);font-size:1rem;line-height:1.2;color:var(--ink)}
+.dtile .dsteps{grid-area:st;font-size:12px;line-height:1.25;color:var(--ink2)}
+.dtile .dn{grid-area:nm;font-size:12px;font-weight:600;line-height:1.25;color:var(--ink);overflow-wrap:break-word}
+.dtiles:not(.open) .dtile:nth-child(n+3){display:none}
+.dmore{display:none;align-items:center;justify-content:center;gap:4px;margin:6px auto 0;min-height:36px;padding:0 12px;border:0;border-radius:999px;background:none;color:var(--ink2);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.dmore:hover{background:var(--sunken)}.dmore:focus-visible{outline:3px solid var(--edge);outline-offset:1px}
+.dmore .ic{transition:transform .2s var(--ease)}
+.dmore[aria-expanded="true"] .ic{transform:rotate(180deg)}
+.scorecard:has(.dtile:nth-child(3)) .dmore{display:inline-flex}
+@container (min-width:460px){
+  .dtiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dtiles:not(.open) .dtile:nth-child(3){display:grid}
+  .scorecard:has(.dtile:nth-child(3)) .dmore{display:none}
+  .scorecard:has(.dtile:nth-child(4)) .dmore{display:inline-flex}
+}
+/* ===== Today: check-in section (no card) ===== */
+.ckline{display:flex;flex-direction:column;gap:12px;padding:4px 2px 0}
+.ckl-head{display:flex;align-items:center;justify-content:center;text-align:center;gap:12px;min-height:28px}
+.ckl-head h2{margin:0;font-size:1.0625rem;line-height:1.3}
+.ckl-done{display:inline-grid;place-items:center;flex:none;color:var(--good)}
+.ckl-done .ic{width:24px;height:24px}
+/* ===== Check-in chooser ===== */
+.ckbanner + .ck-card{padding-top:16px}
+.ckseg>button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;font-size:var(--t-md)}
+.ckseg .segdone{display:inline-grid;place-items:center;margin-left:2px}
+.ckseg .segdone .ic{width:16px;height:16px;stroke-width:3}
+/* ===== Check-in saved ===== */
+.ckbanner.done-scene{height:auto;aspect-ratio:390/150}
+.done-card{text-align:center;padding-top:14px}
+.done-head .q{margin:0}.done-head p{margin-top:6px}
+.done-score{text-align:center}
+.done-delta{display:inline-flex;align-items:center;gap:4px;margin:8px 0 0;font-size:12px;font-weight:700;color:var(--ink2)}
+.done-delta.up{color:var(--good)}.done-delta.down{color:var(--bad)}
+.summary li:last-child{border-bottom:0;padding-bottom:0}
+/* graph key inside an information sheet */
+.ikey{list-style:none;margin:0 0 var(--s4);padding:12px 14px;display:grid;gap:10px;border-radius:12px;background:var(--sunken)}
+.ikey li{display:flex;align-items:center;gap:12px;font-size:var(--t-sm);font-weight:600;color:var(--ink)}
+.ikey svg{width:28px;height:12px;flex:none;overflow:visible}
+.ikey .k-line{stroke:var(--chart);stroke-width:3;stroke-linecap:round;fill:none}
+.ikey .k-dash{stroke:var(--ink2);stroke-width:1.75;stroke-dasharray:4 3;fill:none}
+.ikey .k-band{fill:var(--accent-soft);stroke:var(--line)}
+.ikey .k-open{fill:var(--surface);stroke:var(--chart);stroke-width:2}
+/* tab bar icons about 10% larger, centred in their pill; the bar keeps its height */
+.tabbar a .ic{width:24px;height:24px;display:block}
+.tabbar a .ti{justify-self:center}
+
+/* check-in questions: Next and Finish get the same shine and pop as the other big check-in buttons */
+.ck-go:disabled,.ck-go[disabled]{transform:none;box-shadow:none}
+.ck-go:disabled::before{display:none}
+.ck-go:disabled .go-arrow{transform:none}
+.ck-fin .lbl{padding-right:34px}
+.ck-yay{position:absolute;right:16px;top:50%;font-size:28px;line-height:1;transform:translateY(-52%) rotate(-14deg) scale(1.15);transform-origin:50% 70%;transition:transform .25s var(--ease);filter:drop-shadow(0 2px 2px rgb(0 0 0 / .25));pointer-events:none;animation:yaypop .5s var(--ease) both}
+.ck-fin:not(:disabled):hover .ck-yay,.ck-fin:not(:disabled):focus-visible .ck-yay{transform:translateY(-60%) rotate(-18deg) scale(1.35);animation:yaywave .8s var(--ease) infinite alternate}
+.ck-fin:disabled .ck-yay{opacity:.55;filter:grayscale(.6)}
+@keyframes yaypop{0%{transform:translateY(-52%) rotate(-30deg) scale(.4);opacity:0}70%{transform:translateY(-62%) rotate(-10deg) scale(1.4)}100%{transform:translateY(-52%) rotate(-14deg) scale(1.15);opacity:1}}
+@keyframes yaywave{from{transform:translateY(-60%) rotate(-22deg) scale(1.35)}to{transform:translateY(-60%) rotate(-10deg) scale(1.35)}}
+@media (prefers-reduced-motion:reduce){.ck-yay{animation:none!important}}
+/* Finish: the shine is a moving background, so the button itself can let the emoji pop out past its edge */
+.ck-fin{overflow:visible}
+.ck-fin::before{border-radius:inherit;transform:none;background-size:260% 100%;background-position:130% 0;background-repeat:no-repeat;transition:background-position .7s var(--ease)}
+.ck-fin:not(:disabled):hover::before,.ck-fin:not(:disabled):focus-visible::before{transform:none;background-position:-30% 0}
+
+/* Finish check-in!  The hands sit right beside the words at the same size, tilted a little; hover or click pops them outward with a small twist */
+.ck-fin .lbl{padding-right:0;gap:6px}
+.ck-fin .ck-yay{position:static;display:inline-block;font-size:1em;line-height:1;transform:rotate(-12deg);transform-origin:50% 70%;filter:none;animation:none;transition:transform .25s var(--ease)}
+.ck-fin:not(:disabled):hover .ck-yay,.ck-fin:not(:disabled):focus-visible .ck-yay{animation:yaytwist .55s var(--ease) both}
+.ck-fin.popping .ck-yay{animation:yayburst .26s var(--ease) both}
+.ck-fin:disabled .ck-yay{opacity:.55;filter:grayscale(.6)}
+@keyframes yaytwist{0%{transform:rotate(-12deg) scale(1)}40%{transform:translate(2px,-3px) rotate(-26deg) scale(1.7)}100%{transform:translate(1px,-2px) rotate(-16deg) scale(1.45)}}
+@keyframes yayburst{0%{transform:translate(1px,-2px) rotate(-16deg) scale(1.45)}60%{transform:translate(4px,-6px) rotate(-30deg) scale(2)}100%{transform:translate(2px,-3px) rotate(-18deg) scale(1.6)}}
+@media (prefers-reduced-motion:reduce){.ck-fin .ck-yay{animation:none!important}}
+
+/* the pet chip is a button: the heart fills bright red (outline kept) when clicked */
+button.moodchip{border:0;cursor:pointer;font:inherit;font-size:var(--t-xs);font-weight:700;touch-action:manipulation;min-width:44px}
+button.moodchip::after{content:'';position:absolute;inset:-9px -6px}
+button.moodchip:focus-visible{outline:3px solid var(--edge);outline-offset:2px}
+button.moodchip .ic{transition:transform .2s var(--ease),fill .15s}
+button.moodchip.loved .ic{fill:#ff1f3d;color:#ff1f3d;stroke:var(--ink);animation:heartbeat .6s var(--ease) 3}
+@keyframes heartbeat{0%,100%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.95)}}
+.petscene .flyheart{position:absolute;left:0;top:0;width:14px;height:14px;z-index:3;pointer-events:none;will-change:transform,opacity}
+.petscene .flyheart .ic{width:14px;height:14px;fill:#ff1f3d;stroke:var(--ink);stroke-width:1.75}

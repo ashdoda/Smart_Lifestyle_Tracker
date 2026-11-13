@@ -9,6 +9,7 @@ from typing import Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
 from . import config, db, questions as Q, scoring
@@ -104,6 +105,11 @@ def _range(con, p, start: str, end: str, items=False) -> list[dict]:
 
 
 # ---------------------------------------------------------------- meta
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse("/docs")
+
+
 @app.get("/health", tags=["meta"])
 def health():
     return {"ok": True}
@@ -115,7 +121,7 @@ def get_config(con=Depends(get_db)):
     green = float(s["green_min"])
     return {
         "green_zone_min_percent": scoring.to_percent(green), "green_zone_min_graph_value": green,
-        "graph_min": -10, "graph_max": 10,
+        "graph_min": 0, "graph_max": 100,
         "rolling_average_days": int(s["rolling_days"]), "graph_min_days": int(s["graph_min_days"]),
         "alert_after_days_below": config.ALERT_AFTER_DAYS_BELOW, "alert_after_days_missed": config.ALERT_AFTER_DAYS_MISSED,
         "edit_hours": int(s["edit_hours"]), "batch_minutes": int(s["batch_minutes"]), "day_start_hour": int(s["day_start_hour"]),
@@ -377,6 +383,11 @@ def get_checkin(patient_id: int, day: date, period: Period, length: Length | Non
         context["person_to_connect_with"] = today_all["SCM1"]
     if period == "evening" and "PAM1" in today_all:
         context["step_target"] = today_all["PAM1"]
+    goal = scoring.core.step_goal(con, patient_id, ds) if period == "evening" else None
+    if goal is not None:
+        context["steps_today"] = goal["steps"]
+        context["step_target"] = goal["target"]
+        context["step_goal_reached"] = goal["reached"]
     return {
         "patient_id": patient_id, "date": ds, "period": period, "length": length, "lengths": list(LENGTHS) if period != "weekly" else ["full"],
         "domains": sorted(db.active_domains(con, patient_id, ds) | Q.MANDATORY),
@@ -556,7 +567,7 @@ def patient_graph(patient_id: int, start: date | None = None, end: date | None =
     days = [d for d in _range(con, p, start.isoformat(), end.isoformat())
             if d["rolling_graph_value"] is not None and first_ok and d["date"] >= first_ok[0]]
     s = db.settings(con)
-    return {"patient_id": patient_id, "green_zone_min_graph_value": float(s["green_min"]), "graph_min": -10, "graph_max": 10,
+    return {"patient_id": patient_id, "green_zone_min_graph_value": float(s["green_min"]), "graph_min": 0, "graph_max": 100,
             "days": [{"date": d["date"], "rolling_graph_value": d["rolling_graph_value"], "in_green_zone": d["rolling_in_green_zone"],
                       "in_progress": d["in_progress"]} for d in days]}
 
@@ -568,3 +579,34 @@ def get_day_score(patient_id: int, day: date, con=Depends(get_db)):
     if not days:
         raise HTTPException(404, "No score for that day (before enrollment or in the future)")
     return days[0]
+
+
+# ---------------------------------------------------------------- watch data (steps)
+@app.get("/patients/{patient_id}/fitness", tags=["fitness"], summary="Daily steps from the watch data, one row per day")
+def get_fitness(patient_id: int, start: date | None = Query(None, description="Default: 30 days ago"),
+                end: date | None = Query(None, description="Default: today. May be in the future (seed_demo.py stores 35 days ahead)."),
+                con=Depends(get_db)):
+    """Returns what is stored (seed_demo.py moves the dates to run from 365 days back to 35 days ahead). Days with no reading are
+    simply absent. TRACKER_FITNESS_REPLAY=1 instead hands any requested day one of the patient's stored days (same day, same numbers);
+    `source_day` says which."""
+    p = _patient_or_404(con, patient_id)
+    end = end or date.fromisoformat(_checkin_today_str())
+    start = start or end - timedelta(days=29)
+    uid = p["fitness_user_id"]
+    if uid is None:
+        return {"patient_id": patient_id, "has_watch_data": False, "days": []}
+    if not config.FITNESS_REPLAY:
+        rows = con.execute("SELECT date, steps FROM fitness_records WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date",
+                           (uid, start.isoformat(), end.isoformat())).fetchall()
+        last = con.execute("SELECT MAX(date) FROM fitness_records WHERE user_id = ?", (uid,)).fetchone()[0]
+        return {"patient_id": patient_id, "has_watch_data": True, "replayed": False, "latest_watch_day": last,
+                "days": [dict(r) for r in rows]}
+    source = [dict(r) for r in con.execute("SELECT date, steps FROM fitness_records WHERE user_id = ? ORDER BY date", (uid,))]
+    if not source:
+        return {"patient_id": patient_id, "has_watch_data": False, "days": []}
+    out, d = [], start
+    while d <= end:
+        src = source[(d - date(2023, 1, 1)).days % len(source)]
+        out.append({"date": d.isoformat(), "steps": src["steps"], "source_day": src["date"]})
+        d += timedelta(days=1)
+    return {"patient_id": patient_id, "has_watch_data": True, "replayed": True, "latest_watch_day": end.isoformat(), "days": out}
