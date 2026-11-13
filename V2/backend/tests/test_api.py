@@ -390,13 +390,45 @@ def test_goal_missed_skips_both_questions_and_scores_minus_one(client):
     assert put(client, pid, "2026-11-10", "evening", {"GE0": 5, "PAE5": "Proud"}).status_code == 422
 
 
-def test_no_steps_that_day_asks_the_question_as_usual(client):
+def test_no_steps_that_day_counts_as_zero_steps(client):
     pid = _watch(client, {"2026-11-09": 9000})                      # nothing for the 10th
     put(client, pid, "2026-11-10", "morning", {"GM5": 5, "PAM1": 6000})
     ids = _evening_ids(client, pid)
-    assert "PAE4" in ids and ids["PAE5"]["show_if"] == {"question": "PAE4", "equals": "Yes"}
-    put(client, pid, "2026-11-10", "evening", {"GE0": 5, "PAE4": "No"})
-    assert {i["question_id"]: i["points"] for i in score(client, pid, "2026-11-10")["items"]}["PAE4"] == -1
+    assert "PAE4" not in ids and "PAE5" not in ids                  # decided from the watch: 0 steps, goal not reached
+    ctx = client.get(f"/patients/{pid}/checkins/2026-11-10/evening").json()["context"]
+    assert ctx["steps_today"] == 0 and ctx["step_target"] == 6000 and ctx["step_goal_reached"] is False
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5})
+    d = score(client, pid, "2026-11-10")
+    assert {i["question_id"]: i["points"] for i in d["items"]}["PAE4"] == -1
+
+
+def test_target_edit_recalculates_later_evenings(client, clock):
+    pid = _watch(client, {"2026-11-09": 5000, "2026-11-10": 5000})
+    clock.set("2026-11-09T08:00:00")
+    put(client, pid, "2026-11-09", "morning", {"GM5": 5, "PAM1": 6000})
+    put(client, pid, "2026-11-09", "evening", {"GE0": 5})
+    clock.set("2026-11-10T08:00:00")
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5})              # carries yesterday's 6000 forward
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5})
+    assert {i["question_id"]: i["answer"] for i in score(client, pid, "2026-11-10")["items"]}["PAE4"] == "No"
+    clock.set("2026-11-09T09:00:00")
+    r = put(client, pid, "2026-11-09", "morning", {"GM5": 5, "PAM1": 4000})  # edit the earlier target
+    assert r.status_code == 200, r.text
+    clock.set("2026-11-10T09:00:00")
+    for day in ("2026-11-09", "2026-11-10"):                            # both evenings follow it, no manual rescore
+        d = score(client, pid, day)
+        assert "items" in d, d
+        assert {i["question_id"]: i["answer"] for i in d["items"]}["PAE4"] == "Yes"
+        assert d["domains"]["physical_activity"]["score"] == 1
+
+
+def test_target_removed_clears_the_automatic_answer(client):
+    pid = _watch(client, {"2026-11-10": 8000})
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5, "PAM1": 6000})
+    put(client, pid, "2026-11-10", "evening", {"GE0": 5})
+    assert "PAE4" in {i["question_id"] for i in score(client, pid, "2026-11-10")["items"]}
+    put(client, pid, "2026-11-10", "morning", {"GM5": 5})              # target taken away
+    assert "PAE4" not in {i["question_id"] for i in score(client, pid, "2026-11-10")["items"]}
 
 
 def test_patient_without_a_watch_is_asked_as_usual(client, patient):

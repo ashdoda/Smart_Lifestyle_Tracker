@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -8 200 204" width="200" height="204" role="img" aria-label="Pip"><g>
+    <g><g>
+      <g>
+        <g><path d="M142 156 C184 160 198 120 176 96 C172 122 158 136 138 136 Z" fill="#D4A190" /><path d="M176 96 C186 110 186 126 180 138 C170 128 170 112 176 96 Z" fill="#ecd5cd" /></g>
+        <ellipse cx="100" cy="142" rx="54" ry="42" fill="#D4A190" />
+        <ellipse cx="100" cy="152" rx="32" ry="28" fill="#ecd5cd" />
+        <ellipse cx="74" cy="180" rx="17" ry="9" fill="#be9181" /><ellipse cx="126" cy="180" rx="17" ry="9" fill="#be9181" />
+        <g>
+          <g><path d="M54 68 L44 20 Q74 26 90 54 Z" fill="#D4A190" /><path d="M58 58 L53 32 Q70 36 81 52 Z" fill="#d68d87" /></g>
+          <g><path d="M146 68 L156 20 Q126 26 110 54 Z" fill="#D4A190" /><path d="M142 58 L147 32 Q130 36 119 52 Z" fill="#d68d87" /></g>
+          <ellipse cx="100" cy="94" rx="54" ry="44" fill="#D4A190" />
+          <ellipse cx="100" cy="110" rx="24" ry="16" fill="#ecd5cd" />
+          <g><ellipse cx="66" cy="106" rx="9" ry="6" fill="#d68d87" /><ellipse cx="134" cy="106" rx="9" ry="6" fill="#d68d87" /></g>
+          <g><g><ellipse cx="78" cy="92" rx="6.5" ry="8.5" fill="#4A3C32" /><ellipse cx="122" cy="92" rx="6.5" ry="8.5" fill="#4A3C32" /><circle cx="80" cy="89" r="2.2" fill="#ffffff" /><circle cx="124" cy="89" r="2.2" fill="#ffffff" /></g></g>
+          <path d="M95 103 Q100 99 105 103 Q100 108 95 103 Z" fill="#4A3C32" />
+          <path d="M92 112 Q100 117 108 112" fill="none" stroke="#4A3C32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+      </g>
+      </g></g></g><title>Pip</title></svg>

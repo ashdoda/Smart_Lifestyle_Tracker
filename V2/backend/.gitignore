@@ -2,3 +2,5 @@ app.db
 app.db-*
 __pycache__/
 .pytest_cache/
+demo.db
+demo.db-*

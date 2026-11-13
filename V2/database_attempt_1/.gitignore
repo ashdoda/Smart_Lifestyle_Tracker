@@ -1,5 +1,0 @@
-*.db
-!sample.db
-data/
-__pycache__/
-fitness_tracker_dataset.csv
