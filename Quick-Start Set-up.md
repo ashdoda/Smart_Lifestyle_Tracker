@@ -8,6 +8,8 @@ Smart Lifestyle Tracker: a FastAPI backend, a SQLite database and a Vite fronten
 
 Nothing to build or download. `V2/database/sample.db` is the ready-made database (50 patients, 400 days of check-ins and steps). This step copies it to your own `app.db` and moves the dates so check-ins run 365 days back to yesterday and steps run from 365 days back to 35 days ahead.
 
+If you experience issues with py -3.13/python3.13 calls we have found that switching those calls to python only works best to ressolve the issues.
+
 Windows (PowerShell):
 
 ```
