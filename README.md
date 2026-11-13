@@ -1,6 +1,10 @@
 <p align="center"><img src="assets/pip-scene.svg" alt="Pip, the app's friendly companion, on a hill" width="360"></p>
 
-<p align="center"><a href="assets/demo.mp4"><b>&#9654; Watch the 80-second demo</b></a><br><sub>A patient check-in and the practitioner view, using patient 34</sub></p>
+<p align="center">
+
+https://github.com/user-attachments/assets/c974acd0-1ddf-4263-9746-188521cdd718
+
+</p>
 
 # Smart Lifestyle Tracker for Mental Health
 
