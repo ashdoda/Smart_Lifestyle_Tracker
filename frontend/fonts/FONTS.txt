@@ -1,0 +1,7 @@
+Fonts used by the prototype (both free, SIL Open Font License 1.1)
+
+Bricolage Grotesque  - headings, numbers          file: BricolageGrotesque-latin-wght-normal.woff2   (variable weight 200-800)
+Atkinson Hyperlegible Next - body text, controls   file: AtkinsonHyperlegibleNext-latin-wght-normal.woff2 (variable weight 200-800)
+
+CSS variables: --font-display (Bricolage Grotesque), --font-body (Atkinson Hyperlegible Next). The @font-face rules are in css/fonts.css.
+Source: npm packages @fontsource-variable/bricolage-grotesque and @fontsource-variable/atkinson-hyperlegible-next, version 5.3.0.

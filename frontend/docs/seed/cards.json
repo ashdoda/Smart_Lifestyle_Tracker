@@ -1,0 +1,260 @@
+[
+  {
+    "id": "activity",
+    "name": "Physical Activity",
+    "short": "Move",
+    "icon": "footprints",
+    "providerTailored": false,
+    "blurb": "Daily movement goals, a backup plan, and ideas that fit the patient’s energy.",
+    "definition": "Any bodily movement produced by skeletal muscles that requires energy expenditure.",
+    "why": "Regular movement is linked to fewer depressive symptoms and better mood, physical functioning and overall well-being (Noetel et al., 2024).",
+    "practice": "Encourage regular, enjoyable movement; gradually increase frequency, intensity and time; individualize goals based on ability and motivation.",
+    "note": null,
+    "ideas": [
+      "Take a 5-minute daily walk",
+      "Try chair exercises",
+      "Take a standing and stretching break",
+      "Set a daily movement goal",
+      "Pair movement with something you already do",
+      "Follow a short online workout video"
+    ],
+    "weeklyQuestions": [
+      "What type of movement felt most manageable or enjoyable this week?",
+      "How can I build on that activity next week?"
+    ],
+    "resources": [
+      {
+        "kind": "Video",
+        "title": "10-minute gentle stretch, follow along",
+        "len": 10,
+        "energy": "Low energy"
+      },
+      {
+        "kind": "Playlist",
+        "title": "Upbeat movement songs, 120 to 150 BPM",
+        "len": 12,
+        "energy": "Medium energy"
+      },
+      {
+        "kind": "Tip",
+        "title": "Chair exercises for low-energy days",
+        "len": 5,
+        "energy": "Low energy"
+      }
+    ]
+  },
+  {
+    "id": "diet",
+    "name": "Diet & Nutrition",
+    "short": "Eat",
+    "icon": "apple",
+    "providerTailored": false,
+    "blurb": "One small nutrition goal a day, food ideas by nutrient, and an optional meal log.",
+    "definition": "Eating patterns built around whole foods (vegetables, fruits, beans, whole grains, nuts, seeds, olive oil and fish) are associated with better mental health.",
+    "why": "Diets rich in whole foods may reduce depressive symptoms and improve quality of life; Mediterranean-style changes have shown improvements (Bayes et al., 2022).",
+    "practice": "Emphasize whole and minimally processed foods; increase fruits, vegetables, legumes, whole grains and healthy fats; reduce highly processed foods.",
+    "note": null,
+    "ideas": [
+      "Add one fruit or vegetable daily",
+      "Swap one processed snack for a whole food",
+      "Pick one simple meal substitution",
+      "Set one nutrition goal for the week"
+    ],
+    "weeklyQuestions": [
+      "What small nutrition change was easiest to maintain this week?",
+      "How can I make that change more convenient?",
+      "Is there a nutrient or food group I would like to focus on next week?",
+      "Can I find one healthy recipe that fits my schedule?"
+    ],
+    "resources": [
+      {
+        "kind": "Food list",
+        "title": "Affordable foods high in fiber, protein and magnesium",
+        "len": 3,
+        "energy": "Any energy"
+      },
+      {
+        "kind": "Recipe",
+        "title": "Five-ingredient lentil soup (20 minutes)",
+        "len": 20,
+        "energy": "Medium energy"
+      },
+      {
+        "kind": "Recipe",
+        "title": "No-cook protein breakfast ideas",
+        "len": 5,
+        "energy": "Low energy"
+      }
+    ]
+  },
+  {
+    "id": "mind",
+    "name": "Mind-body & Mindfulness",
+    "short": "Pause",
+    "icon": "flower-2",
+    "providerTailored": false,
+    "blurb": "Brief breathing, grounding or meditation, with options by length.",
+    "definition": "Awareness of internal states and surroundings that helps people avoid destructive or automatic habits by observing thoughts and feelings without judging or reacting.",
+    "why": "Brief, regular practice may reduce depression, anxiety and perceived stress while improving emotional regulation and present-moment awareness (Linardon et al., 2024).",
+    "practice": "Encourage consistent, brief practice; introduce techniques gradually; adapt to patient preferences; emphasize nonjudgmental awareness rather than perfection.",
+    "note": null,
+    "ideas": [
+      "1-minute guided breathing",
+      "5-4-3-2-1 grounding",
+      "Brief body scan",
+      "Mindful eating exercise",
+      "2-minute guided meditation"
+    ],
+    "weeklyQuestions": [
+      "Which mindfulness practice helped me feel more present?",
+      "When would it be easiest to repeat that practice?",
+      "Are there other forms of mindfulness or meditation I would like to explore?"
+    ],
+    "resources": [
+      {
+        "kind": "Audio",
+        "title": "1-minute breathing reset",
+        "len": 1,
+        "energy": "Low energy"
+      },
+      {
+        "kind": "Audio",
+        "title": "3-minute body scan",
+        "len": 3,
+        "energy": "Low energy"
+      },
+      {
+        "kind": "Audio",
+        "title": "5-minute grounding, 5-4-3-2-1",
+        "len": 5,
+        "energy": "Any energy"
+      },
+      {
+        "kind": "Audio",
+        "title": "10-minute guided meditation for beginners",
+        "len": 10,
+        "energy": "Medium energy"
+      }
+    ]
+  },
+  {
+    "id": "sleep",
+    "name": "Restorative Sleep",
+    "short": "Rest",
+    "icon": "moon-star",
+    "providerTailored": false,
+    "blurb": "A wind-down plan, bedtime check-ins and routine suggestions.",
+    "definition": "7 to 9 hours of quality sleep each night so the body and brain can rest, regulate and repair.",
+    "why": "Consistently restorative sleep supports physical health, emotional resilience, cognitive performance and long-term disease prevention.",
+    "practice": "Maintain consistent sleep and wake times; limit sleep-disrupting behaviors; assess for sleep disorders; use cognitive behavioral therapy for insomnia (CBT-I) when clinically indicated.",
+    "note": "For patients with insomnia, the bedtime questions can be individualized to CBT-I principles.",
+    "ideas": [
+      "Keep the same wake-up time",
+      "Build a 10-minute bedtime routine",
+      "Reduce screens in the evening",
+      "Try a brief relaxation exercise",
+      "Pick one sleep-disrupting habit to change"
+    ],
+    "weeklyQuestions": [
+      "What patterns have I noticed between my daily habits and how rested I feel?",
+      "Which parts of my bedtime routine seem to be most helpful?",
+      "Is there one small change I could make to improve my sleep routine next week?"
+    ],
+    "resources": [
+      {
+        "kind": "Setup guide",
+        "title": "Set a wind-down reminder and Focus mode (phone settings)",
+        "len": 4,
+        "energy": "Any energy"
+      },
+      {
+        "kind": "Tip",
+        "title": "Why the same wake-up time helps sleep",
+        "len": 2,
+        "energy": "Any energy"
+      },
+      {
+        "kind": "Audio",
+        "title": "5-minute relaxation for bedtime",
+        "len": 5,
+        "energy": "Low energy"
+      }
+    ]
+  },
+  {
+    "id": "social",
+    "name": "Social Connection",
+    "short": "Connect",
+    "icon": "users",
+    "providerTailored": false,
+    "blurb": "One small connection a day, with low-effort ideas for low-energy days.",
+    "definition": "Having the number, quality and variety of relationships you want, and feeling that you belong and have the support and care you need.",
+    "why": "High-quality relationships are linked to longer, healthier lives and can improve how people manage stress, anxiety and depression.",
+    "practice": "Assess perceived loneliness and relationship quality; encourage meaningful, reciprocal relationships; consider cultural preferences and social barriers; prioritize quality over number of interactions.",
+    "note": null,
+    "ideas": [
+      "Send one supportive text",
+      "Schedule a brief call with a friend or family member",
+      "Identify one trusted support person",
+      "Plan one enjoyable social interaction",
+      "Express gratitude to someone"
+    ],
+    "weeklyQuestions": [
+      "Which relationships help me feel supported?",
+      "What is one way I could strengthen those connections?",
+      "Is there someone I would like to reconnect with or spend more time with?"
+    ],
+    "resources": [
+      {
+        "kind": "Idea list",
+        "title": "Low-effort ways to connect when energy is low",
+        "len": 2,
+        "energy": "Low energy"
+      },
+      {
+        "kind": "Tip",
+        "title": "A two-line text that opens a conversation",
+        "len": 1,
+        "energy": "Low energy"
+      }
+    ]
+  },
+  {
+    "id": "substance",
+    "name": "Avoiding Harmful Substances",
+    "short": "Steady",
+    "icon": "shield-check",
+    "providerTailored": true,
+    "blurb": "Goals, triggers and coping plans written for this patient’s treatment plan.",
+    "definition": "Minimizing or eliminating behaviors and exposures, such as tobacco use, excessive alcohol and drug misuse, that drive chronic illness and reduce well-being.",
+    "why": "Reducing substance use lowers physical and psychological harm and may improve sleep, functioning and mental health; digital tools have reduced alcohol use (Sohi et al., 2023).",
+    "practice": "Routinely screen for tobacco, alcohol and drug use; use nonjudgmental motivational interviewing; provide individualized risk-reduction plans.",
+    "note": "Questions should follow the individual treatment plan and risk level, particularly where reducing use could involve withdrawal concerns. The provider selects or writes these.",
+    "ideas": [
+      "Identify one trigger",
+      "Practice a brief craving-management technique",
+      "Set one reduction goal",
+      "Name a healthier alternative",
+      "Make a simple coping plan for high-risk situations"
+    ],
+    "weeklyQuestions": [
+      "What situations increased my risk of using this week?",
+      "Which coping strategies or supports were most helpful?",
+      "What is one adjustment I can make to support my goal next week?"
+    ],
+    "resources": [
+      {
+        "kind": "Coping list",
+        "title": "Craving toolkit: distract, ground, call someone, change place",
+        "len": 3,
+        "energy": "Any energy"
+      },
+      {
+        "kind": "Audio",
+        "title": "3-minute urge surfing",
+        "len": 3,
+        "energy": "Any energy"
+      }
+    ]
+  }
+]

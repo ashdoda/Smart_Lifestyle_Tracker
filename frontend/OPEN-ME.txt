@@ -1,0 +1,13 @@
+Lifestyle Tracker prototype, paged version (plain HTML, CSS and JavaScript; no build step, no internet needed)
+
+Open index.html in a browser (double-click works), or from this folder run:  python3 -m http.server 8000   then visit http://localhost:8000
+The sign-in page has two buttons that fill in the example logins (Provider, Patient). Example data = ONE made-up patient (Alex Sample) in js/hk-example-data.js.
+"Add patients" in the provider view creates more test patients. Delete js/hk-example-data.js (and its script line in the 10 pages) for real use.
+
+docs/BACKEND_HANDOFF.md   what the server must provide (endpoints)
+docs/DATABASE_HANDOFF.md  what the database must hold (tables, fields, reference data)
+docs/seed/                reference content as JSON (cards, questions, lists), generated from the code
+docs/examples/            larger example data files in the exact shapes the screens read (not loaded by the app)
+palette/                  color palette (PNG + token table)      fonts/  the two fonts
+js/hk-data.js             the one file where real data plugs in (empty by default)
+js/hk-example-data.js     the example provider login + one example patient (remove for real use)
