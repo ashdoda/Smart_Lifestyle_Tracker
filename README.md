@@ -1,5 +1,7 @@
 <p align="center"><img src="assets/pip-scene.svg" alt="Pip, the app's friendly companion, on a hill" width="360"></p>
 
+<p align="center"><a href="assets/demo.mp4"><b>&#9654; Watch the 80-second demo</b></a><br><sub>A patient check-in and the practitioner view, using patient 34</sub></p>
+
 # Smart Lifestyle Tracker for Mental Health
 
 A daily check-in app that turns a morning and an evening reflection into one simple score. Patients see whether they are staying in a healthy "green zone." Practitioners see who is slipping early enough to step in.
