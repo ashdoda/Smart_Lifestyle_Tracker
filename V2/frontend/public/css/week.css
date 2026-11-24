@@ -258,7 +258,7 @@ svg.mini .rl{fill:none;stroke:var(--ink2);stroke-width:1.75;stroke-dasharray:6 4
   .rep-doms .rdrow{row-gap:4px}
 }
 /* bar stops at a comfortable length; numbers stay right-aligned at any width */
-.rep-doms .rdlist{grid-template-columns:28px max-content minmax(48px,260px) minmax(0,1fr) 44px max-content max-content}
+.rep-doms .rdlist{grid-template-columns:28px max-content minmax(40px,260px) minmax(0,1fr) 36px max-content max-content;column-gap:8px}
 .rep-doms .rdrow .avg{grid-column:5}.rep-doms .rdrow .chg{grid-column:6}.rep-doms .rdrow .gzd{grid-column:7}
 @container (max-width:520px){
   .rep-doms .rdlist{grid-template-columns:28px minmax(0,1fr) 44px max-content}
