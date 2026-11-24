@@ -4,7 +4,7 @@
 // table version, and click a point to see what changed. The practitioner pages use it for each patient.
 /* ===== Lifestyle score chart: hand-built SVG, stock-market style, resizable, zoomable, with custom date range ===== */
 // Smallest and default chart size, and the list of time ranges you can pick
-const CHART_MIN = { w: 380, h: 360 }, CHART_DEF = { w: 640, h: 500 };
+const CHART_MIN = { w: 380, h: 360 }, CHART_DEF = { w: 4000, h: 500 };
 const RANGES = ['1D', '7D', '1M', '6M', '1Y'], RANGE_FIX = { '5D': '7D', 'Y': '1Y', '5Y': '1Y' };
 // Small helpers for dates and times
 const dateAt = (d, h) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(h), Math.round((h % 1) * 60));
@@ -195,7 +195,6 @@ function graphKeyDialog() {
     [sw('<path d="M3 13 L20 6 L37 9" class="cline"/><circle cx="20" cy="6" r="3.5" class="cpt"/>'), 'Daily score', 'One score per day, 0 to 100'],
     [sw('<path d="M3 10 H37" class="croll"/><circle cx="20" cy="10" r="3.5" class="crpt"/>'), '7-day average', 'Average of the 7 days ending on each date'],
     [sw('<rect x="3" y="3" width="34" height="9" class="cgz"/><path d="M3 12 H37" class="cgzl"/>'), 'Green zone', `${fmtG(GREEN_AT())} to 100. The dashed line marks where it starts`],
-    [sw('<path d="M3 9 H37" class="cbase"/>'), 'First day’s score', 'The change above the chart is measured from this line'],
     [sw('<path d="M6 13 L32 6" class="cdash"/><circle cx="32" cy="6" r="3.5" class="cprov"/>'), 'Today, not final', 'Can change until the day ends'],
     [sw('<circle cx="20" cy="9" r="5" class="cend"/>'), 'Latest finished day', 'The most recent full day'],
     [sw('<path d="M3 15 H37" class="cax"/><path d="M20 7 V15" class="cmiss"/>'), 'No score that day', 'Short mark on the bottom axis'],
@@ -209,13 +208,14 @@ function graphKeyDialog() {
 // Puts the whole chart on the page. Everything below belongs to this one chart
 function mountScoreChart(host, p, opts = {}) {
   const FIX = opts.fixed || null;
-  const saved = FIX ? { w: opts.w || CHART_DEF.w, h: opts.h || 440 } : store.get('chartSize', CHART_DEF);
+  const saved = FIX ? { w: opts.w || CHART_DEF.w, h: opts.h || 440 } : store.get('chartSize2', CHART_DEF);
   const r0 = store.get('chartRange', '1M'); let range = RANGE_FIX[r0] || r0; if (!RANGES.includes(range) || range === '1D') range = '1M';
-  let custom = null, view = null, tableMode = false, hover = -1, sel = null, drag = null, whyPos = null, wmove = null, whyClosed = false, size = { w: saved.w, h: saved.h };
+  let custom = null, view = null, tableMode = false, hover = -1, sel = null, drag = null, whyPos = null, wmove = null, whyClosed = false, showD = true, showR = true, size = { w: saved.w, h: saved.h };
+  const none = () => !showD && !showR;   /* both lines unticked: empty chart, nothing to hover or select */
   const FIRST = day0(p.series[0].d);
   host.innerHTML = `<section class="chartcard${FIX ? ' fixed' : ''}" aria-label="Lifestyle score chart">
     <header class="ch-head"><div class="ch-title"><h2>Lifestyle score</h2><button type="button" class="btn icon sm" data-info aria-label="How is the lifestyle score calculated?">${ic('info')}</button><button type="button" class="btn sm" id="chKeyBtn" aria-haspopup="dialog">Graph key</button><button type="button" class="btn sm" id="chTblBtn">${ic('table-2', 'sm')}<span>Table view</span></button></div>
-      <div class="ch-right"><div class="seg sm" id="ranges" role="group" aria-label="Date range">${RANGES.map(r => `<button type="button" data-r="${r}" aria-pressed="false"${r === '1D' ? ' disabled style="opacity:.45;cursor:not-allowed" title="Not available: there is one score per day"' : ''}>${r}</button>`).join('')}<button type="button" data-r="custom" aria-pressed="false">Custom</button></div>
+      <div class="ch-right"><div class="ch-lines" role="group" aria-label="Lines to show"><label class="ck"><input type="checkbox" id="lnD" checked>Daily score</label><label class="ck"><input type="checkbox" id="lnR" checked>7-day average</label></div><div class="seg sm" id="ranges" role="group" aria-label="Date range">${RANGES.map(r => `<button type="button" data-r="${r}" aria-pressed="false"${r === '1D' ? ' disabled style="opacity:.45;cursor:not-allowed" title="Not available: there is one score per day"' : ''}>${r}</button>`).join('')}<button type="button" data-r="custom" aria-pressed="false">Custom</button></div>
         <div class="zoomctl" role="group" aria-label="Zoom the chart"><button type="button" class="btn icon sm" id="zOut" aria-label="Zoom out" title="Zoom out (Ctrl + scroll down)">${ic('minus', 'sm')}</button><button type="button" class="btn icon sm" id="zIn" aria-label="Zoom in" title="Zoom in (Ctrl + scroll up)">${ic('plus', 'sm')}</button></div></div></header>
     <div class="ch-read" aria-live="polite"><div class="big"><span id="chVal" class="num">--</span><span class="outof" id="chOut">Lifestyle score, 0 to 100</span></div><div class="meta"><span id="chDelta"></span><span id="chWhen" class="muted"></span></div><div class="selacts hide" id="selActs"><button type="button" class="btn sm" id="selZoom">Zoom to this range</button><button type="button" class="btn sm" id="selClear">Clear</button></div></div>
     <div class="ch-body"><div class="ch-plot" id="chPlot" tabindex="0" role="application" aria-label="Lifestyle score chart. Left and right arrows move between days, up and down arrows switch between daily score and 7-day average, Enter opens details."><div class="ch-svg"></div><div class="selband hide" id="selBand"></div><div class="selwhy hide" id="selWhy"></div><div class="tip hide" id="chTip"></div><div class="ch-empty hide" id="chEmpty"></div></div><div class="ch-table hide" id="chTable"></div></div>
@@ -348,15 +348,15 @@ function mountScoreChart(host, p, opts = {}) {
       <line x1="${M.l}" x2="${W - M.r}" y1="${yb}" y2="${yb}" class="cax"/>
       ${ax.minor.map(m => `<line x1="${m.x.toFixed(1)}" x2="${m.x.toFixed(1)}" y1="${yb - 3}" y2="${yb + (m.major ? 6 : 4)}" class="ctk${m.major ? ' maj' : ''}"/>`).join('')}
       ${ax.labels.map((l, i) => { const w = l.text.length * 6.4, a = l.x - w / 2 < 2 ? 'start' : l.x + w / 2 > W - 2 ? 'end' : 'middle'; return `<text x="${(a === 'start' ? Math.max(2, l.x - 2) : a === 'end' ? Math.min(W - 2, l.x + 2) : l.x).toFixed(1)}" y="${H - 6}" text-anchor="${a}" class="ct">${l.text}</text>`; }).join('')}
-      ${view.baseline != null && have.length ? `<line x1="${M.l}" x2="${W - M.r}" y1="${Y(view.baseline).toFixed(1)}" y2="${Y(view.baseline).toFixed(1)}" class="cbase"/>` : ''}
       ${missX.map(x => `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${yb - 10}" y2="${yb}" class="cmiss"/>`).join('')}
-      <path d="${area}" class="carea"/>
-      <path d="${dash}" class="cdash"/>
-      <path d="${rline}" class="croll"/>
-      <path d="${line}" class="cline"/>
-      ${dots && view.mode === 'day' ? pts.filter(q => q.rv != null).map(q => `<circle cx="${q.x.toFixed(1)}" cy="${Y(q.rv).toFixed(1)}" r="4" class="crpt${q.prov ? ' open' : ''}"/>`).join('') : ''}
-      ${dots ? have.map(q => `<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${view.mode === 'event' ? 4.5 : 4.5}" class="${q.prov ? 'cprov' : 'cpt'}"/>`).join('') : ''}
-      ${last ? `<circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="5" class="cend"/>` : ''}
+      ${showD ? `<path d="${area}" class="carea"/>` : ''}
+      ${showD ? `<path d="${dash}" class="cdash"/>` : ''}
+      ${showR ? `<path d="${rline}" class="croll"/>` : ''}
+      ${showD ? `<path d="${line}" class="cline"/>` : ''}
+      ${showR && dots && view.mode === 'day' ? pts.filter(q => q.rv != null).map(q => `<circle cx="${q.x.toFixed(1)}" cy="${Y(q.rv).toFixed(1)}" r="4" class="crpt${q.prov ? ' open' : ''}"/>`).join('') : ''}
+      ${showD && dots ? have.map(q => `<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="${view.mode === 'event' ? 4.5 : 4.5}" class="${q.prov ? 'cprov' : 'cpt'}"/>`).join('') : ''}
+      ${showD && last ? `<circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="5" class="cend"/>` : ''}
+      ${none() ? `<text x="${((M.l + W - M.r) / 2).toFixed(1)}" y="${((M.t + yb) / 2).toFixed(1)}" text-anchor="middle" class="ct" style="font-size:14px">No lines selected</text>` : ''}
       <g id="hv" class="hide"><line id="hvl" y1="${M.t}" y2="${yb}" class="chl"/><circle id="hvc" r="7" class="chc"/></g></svg>`;
     svgBox.innerHTML = svg;
     plot._m = { M, iw, ih, W, H, Y };
@@ -368,14 +368,15 @@ function mountScoreChart(host, p, opts = {}) {
   const hoverable = () => view.pts.map((q, i) => [q, i]);
   // Shows details when you hover over or tab to a point
   function showHover(i) {
+    if (none()) return;
     const q = view.pts[i]; if (!q) return; hover = i;
     const hv = $('#hv', host); if (!hv) return; hv.classList.remove('hide');
     const l = $('#hvl', host), c = $('#hvc', host); l.setAttribute('x1', q.x); l.setAttribute('x2', q.x);
-    if (q.v != null) { const onRoll = kser === 'r' && q.rv != null && plot._m.Y; c.setAttribute('cx', q.x); c.setAttribute('cy', onRoll ? plot._m.Y(q.rv) : q.y); c.classList.remove('hide'); } else c.classList.add('hide');
+    if (q.v != null) { const onRoll = curSer() === 'r' && q.rv != null && plot._m.Y; c.setAttribute('cx', q.x); c.setAttribute('cy', onRoll ? plot._m.Y(q.rv) : q.y); c.classList.remove('hide'); } else c.classList.add('hide');
     tip.classList.remove('hide'); tip.replaceChildren();
     const mk = (cls, txt) => { const d = document.createElement('div'); d.className = cls; d.textContent = txt; tip.appendChild(d); };
     mk('tdate', view.mode === 'event' ? q.sub : view.mode === 'check' ? `${q.label} · ${q.time}` : q.label);
-    if (q.v != null) { mk('tval', fmtG(q.v)); mk('tsub', view.mode === 'event' ? q.label : (q.sub || 'Daily score')); if (q.rv != null) mk('tsub', `7-day average ${fmtG(q.rv)}`); if (view.mode === 'day') mk('thint', kser === 'r' ? 'Selected: 7-day average. Enter for details, up or down arrow to switch.' : 'Selected: daily score. Enter for details, up or down arrow to switch.'); }
+    if (q.v != null) { mk('tval', fmtG(q.v)); mk('tsub', view.mode === 'event' ? q.label : (q.sub || 'Daily score')); if (q.rv != null) mk('tsub', `7-day average ${fmtG(q.rv)}`); if (view.mode === 'day') mk('thint', (showD && showR ? (curSer() === 'r' ? 'Selected: 7-day average. Enter for details, up or down arrow to switch.' : 'Selected: daily score. Enter for details, up or down arrow to switch.') : (curSer() === 'r' ? 'Showing the 7-day average. Enter for details.' : 'Showing the daily score. Enter for details.'))); }
     else { mk('tval', '--'); mk('tsub', q.sub || 'No score'); }
     const W = plot._m.W, tw = tip.offsetWidth || 150, left = q.x > W * .58 ? q.x - tw - 14 : q.x + 14;
     tip.style.left = clamp(left, 4, W - tw - 4) + 'px'; tip.style.top = '8px';
@@ -384,11 +385,11 @@ function mountScoreChart(host, p, opts = {}) {
   function hideHover() { hover = -1; const hv = $('#hv', host); hv && hv.classList.add('hide'); tip.classList.add('hide'); setRead(null); }
   const nearestValid = x => { let best = null, bd = 1e9; view.pts.forEach((q, i) => { if (q.v == null) return; const d = Math.abs(q.x - x); if (d < bd) { bd = d; best = i; } }); return best; };
   /* a press lands on the 7-day average marker when it is closer to it than to the daily point */
-  const nearerRolling = (i, y) => { const q = view.pts[i], Yf = plot._m && plot._m.Y; if (!q || q.rv == null || !Yf) return false; return Math.abs(y - Yf(q.rv)) < Math.abs(y - q.y) && Math.abs(y - Yf(q.rv)) <= 18; };
+  const nearerRolling = (i, y) => { const q = view.pts[i], Yf = plot._m && plot._m.Y; if (!q || q.rv == null || !Yf || !showR) return false; if (!showD) return true; return Math.abs(y - Yf(q.rv)) < Math.abs(y - q.y) && Math.abs(y - Yf(q.rv)) <= 18; };
   // Clicking a point opens its details
   const openPoint = (i, kind) => { const q = view.pts[i]; if (!q || q.v == null) return; if (kind === 'r' && q.rv != null) rollDialog(p, q); else dayDialog(p, q); };
   plot.addEventListener('pointerdown', e => {
-    if (!plot._m || tableMode || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (!plot._m || tableMode || none() || (e.pointerType === 'mouse' && e.button !== 0)) return;
     const r = plot.getBoundingClientRect(); drag = { x0: e.clientX - r.left, y0: e.clientY - r.top, a: nearestValid(e.clientX - r.left), moved: false };
     try { plot.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
   });
@@ -399,7 +400,7 @@ function mountScoreChart(host, p, opts = {}) {
   };
   plot.addEventListener('pointerup', endDrag2); plot.addEventListener('pointercancel', endDrag2);
   plot.addEventListener('pointermove', e => {
-    if (!plot._m || tableMode) return;
+    if (!plot._m || tableMode || none()) return;
     if (drag) {
       const r = plot.getBoundingClientRect(), x = e.clientX - r.left;
       if (!drag.moved && Math.abs(x - drag.x0) < 7) return;
@@ -413,10 +414,13 @@ function mountScoreChart(host, p, opts = {}) {
   });
   plot.addEventListener('pointerleave', () => { if (!drag && document.activeElement !== plot) hideHover(); });
   plot.addEventListener('blur', hideHover);
-  let anchor = null, kser = 'd';   /* kser: which series the keyboard is on (d = daily score, r = 7-day average) */
+  let anchor = null, kser = 'd';
+  /* which line the pointer and keyboard are on: forced when only one line is showing */
+  const curSer = () => !showR ? 'd' : !showD ? 'r' : kser;   /* kser: which series the keyboard is on (d = daily score, r = 7-day average) */
   plot.addEventListener('keydown', e => {
     if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomBy(.7, .5); return; }
     if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomBy(1.4, .5); return; }
+    if (none()) return;
     const h = hoverable().filter(([q]) => q.v != null); if (!h.length) return;
     const cur = h.findIndex(([, i]) => i === hover);
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -425,8 +429,8 @@ function mountScoreChart(host, p, opts = {}) {
       else { anchor = null; }
       showHover(h[ni][1]); if (sel && sel.a !== sel.b) renderSel();
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {      /* switch between the daily score and the 7-day average */
-      e.preventDefault(); kser = kser === 'd' ? 'r' : 'd'; if (hover >= 0) showHover(hover);
-    } else if ((e.key === 'Enter' || e.key === ' ') && view.mode === 'day' && hover >= 0) { e.preventDefault(); openPoint(hover, kser); }
+      e.preventDefault(); if (showD && showR) kser = kser === 'd' ? 'r' : 'd'; if (hover >= 0) showHover(hover);
+    } else if ((e.key === 'Enter' || e.key === ' ') && view.mode === 'day' && hover >= 0) { e.preventDefault(); openPoint(hover, curSer()); }
     else if (e.key === 'Escape') { anchor = null; if (sel) clearSel(); else hideHover(); }
   });
   /* the "What moved the score" box: drag it anywhere on the screen, or close it with the x */
@@ -501,7 +505,7 @@ function mountScoreChart(host, p, opts = {}) {
 
   /* ---- resize grip: anchored top-left, grows down and right; size is remembered for every patient ---- */
   const grip = $('#grip', host); let st = null;
-  const persist = () => { if (!FIX) store.set('chartSize', { w: Math.round(size.w), h: Math.round(size.h) }); };
+  const persist = () => { if (!FIX) store.set('chartSize2', { w: Math.round(size.w), h: Math.round(size.h) }); };
   grip.addEventListener('pointerdown', e => { e.preventDefault(); grip.setPointerCapture(e.pointerId); const r = card.getBoundingClientRect(); st = { x: e.clientX, y: e.clientY, w: r.width, h: r.height }; card.classList.add('resizing'); });
   grip.addEventListener('pointermove', e => { if (!st) return; size.w = st.w + e.clientX - st.x; size.h = st.h + e.clientY - st.y; applySize(); });
   const endDrag = () => { if (st) { st = null; card.classList.remove('resizing'); persist(); } };
@@ -509,6 +513,11 @@ function mountScoreChart(host, p, opts = {}) {
   grip.addEventListener('dblclick', () => { size = FIX ? { w: saved.w, h: saved.h } : { ...CHART_DEF }; if (FIX) { want.w = size.w; want.h = size.h; } applySize(); persist(); toast('Chart size reset'); });
   grip.addEventListener('keydown', e => { const k = { ArrowRight: [32, 0], ArrowLeft: [-32, 0], ArrowDown: [0, 32], ArrowUp: [0, -32] }[e.key]; if (!k) return; e.preventDefault(); if (FIX) { want.w = clamp(size.w + k[0], CHART_MIN.w, opts.maxW ? opts.maxW() : 1200); want.h = clamp(size.h + k[1], CHART_MIN.h, 940); } size.w += k[0]; size.h += k[1]; applySize(); persist(); });
   const ro = new ResizeObserver(() => { draw(); }); ro.observe(plot);
+  /* the two checkboxes: show or hide the daily score and the 7-day average (one always stays on) */
+  const lnD = $('#lnD', host), lnR = $('#lnR', host);
+  const syncLines = () => { showD = lnD.checked; showR = lnR.checked; if (none()) { clearSel(); hideHover(); } if (!tableMode) draw(); if (none()) hideHover(); };
+  lnD.addEventListener('change', syncLines);
+  lnR.addEventListener('change', syncLines);
   const onWin = () => applySize(); window.addEventListener('resize', onWin);
   draw();
   return { destroy() { ro.disconnect(); window.removeEventListener('resize', onWin); window.removeEventListener('resize', follow); document.removeEventListener('scroll', follow, true); } };

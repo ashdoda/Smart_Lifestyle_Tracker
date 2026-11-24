@@ -19,6 +19,11 @@
 /* Lower part of the page, split in two columns */
 .pp-lower{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:var(--s6);align-items:start}
 @media (max-width:1000px){.pp-lower{grid-template-columns:1fr}}
+/* Recent responses: as tall as the left column (Snapshot to Domains) and scrolls inside */
+.pp-lower .rr-card{position:relative;align-self:stretch;min-height:260px;padding:0}
+.rr-in{position:absolute;inset:0;display:flex;flex-direction:column;padding:var(--s6)}
+.rr-in .ci{flex:1;min-height:0;overflow-y:auto;padding-right:var(--s2);scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+@media (max-width:1000px){.pp-lower .rr-card{align-self:auto;min-height:420px}}
 /* One row of the "areas" list: icon, name and progress bar */
 .brow{display:grid;grid-template-columns:36px minmax(0,1fr) 128px;gap:var(--s3);align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .brow:last-child{border-bottom:0}
@@ -53,7 +58,6 @@
 /* Parts of the chart drawing: grid lines, labels, the score line, dots and the shaded area */
 .cg{stroke:var(--line);stroke-width:1;opacity:.7}
 .ct{fill:var(--ink3);font-size:12px;font-family:var(--font-ui)}
-.cbase{stroke:var(--ink3);stroke-width:1.5;stroke-dasharray:.1 6;stroke-linecap:round;opacity:.9}
 .carea{fill:var(--chart);opacity:.1}
 .cline{fill:none;stroke:var(--chart);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cdash{fill:none;stroke:var(--chart);stroke-width:2;stroke-dasharray:.1 6;stroke-linecap:round;opacity:.65}
@@ -216,7 +220,7 @@
 .tip .thint{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* weekly report chart: fixed dates, one legend, width-only resize */
-.chartcard.fixed .ch-right{display:none}
+.chartcard.fixed #ranges,.chartcard.fixed .zoomctl{display:none}
 .chartcard.fixed #selZoom{display:none}
 
 /* ===== weekly report chart (fixed dates): compact header, key in a dialog, steady plot ===== */
@@ -250,3 +254,11 @@
 .chartcard.fixed .ch-body{min-height:220px}
 /* patient-detail chart: date ranges and zoom share one line so the header stays compact */
 .chartcard .ch-right{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+
+/* Chart line checkboxes, left of the range buttons */
+.ch-lines{display:inline-flex;align-items:center;gap:var(--s4);margin-right:var(--s2)}
+.ch-lines .ck{display:inline-flex;align-items:center;gap:6px;min-height:var(--h-sm);font-size:var(--t-sm);font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap}
+.ch-lines input{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}
+.ch-lines input:disabled,.ch-lines input:disabled~*{cursor:default}
+.ch-lines .ck:has(input:disabled){cursor:default}
+.ch-lines input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}

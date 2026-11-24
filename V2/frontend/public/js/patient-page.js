@@ -33,7 +33,7 @@ route(/^\/provider\/patient\/([^/?#]+)$/, id => {
       <a class="btn" href="#/provider/patient/${p.id}/report" aria-label="Weekly report">${ic('file-text')}<span>Weekly report</span></a>
     </header>
     ${p.status === 'attention' ? `<div class="notice warn">${ic('triangle-alert')}<span><b>Needs attention.</b> ${window.belowText(p.backend.streak)} <a href="#/provider/patient/${p.id}/report">Weekly report</a></span></div>` : ''}
-    <div class="pp-grid"><div class="pp-main" style="flex:none;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:var(--s4)"><div id="chartHost"></div></div></div>
+    <div class="pp-grid"><div class="pp-main" style="flex:none;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:var(--s4)"><div id="chatHost"></div><div id="chartHost"></div></div></div>
     <div class="pp-lower">
       <div class="pp-side2" style="min-width:0;display:flex;flex-direction:column;gap:var(--s4)">
       <div class="card snap2"><div class="row between" style="margin-bottom:var(--s2)"><h2 class="sh">Snapshot</h2></div>
@@ -46,24 +46,26 @@ route(/^\/provider\/patient\/([^/?#]+)$/, id => {
       <div class="card"><div class="row between" style="margin-bottom:var(--s2)"><h2 class="sh">Domains</h2>${infoBtn('Domains', [`Each bar is the domain’s average lifestyle score for ${W.range}, from 0 to 100. The green mark is where the green zone starts (${fmtG(HK.config.greenGraph ?? 70)}). Arrows compare with ${W.prange}.`, 'Switches save right away. A change starts today, and earlier days keep the domains they had. The General domain is always on.'])}</div>
         <div class="dlist" id="dlist">${rows}</div><span class="sr dlive" aria-live="polite"></span></div>
       </div>
-      <div class="card"><div class="row between" style="margin-bottom:var(--s3)"><h2 class="sh">Recent responses</h2><a class="link" href="#/provider/patient/${p.id}/report">Weekly report</a></div><ul class="ci" id="recentCi"><li class="muted">Loading…</li></ul></div>
+      <div class="card rr-card"><div class="rr-in"><div class="row between" style="margin-bottom:var(--s3)"><h2 class="sh">Recent responses</h2><a class="link" href="#/provider/patient/${p.id}/report">Weekly report</a></div><ul class="ci" id="recentCi"><li class="muted">Loading…</li></ul></div></div>
     </div>`);
   // Keep the chart so it can be redrawn or removed
-  let chart, root0;
+  let chart, chat, root0;
   // Draws (or redraws) the score chart
   const drawChart = () => { chart && chart.destroy(); chart = mountScoreChart($('#chartHost', root0), PAT[id]); };
   return {
     // "html" is the page; "mount" turns on the chart, info buttons and area switches
     html, mount(root) {
       root0 = root; mountShell(root); bindInfo(root); drawChart();
+      // Put the assistant chat box above the chart
+      chat = window.mountChatBox ? window.mountChatBox($('#chatHost', root), p) : null;
       // Turn on the area switches; when one is saved, update the count and redraw the chart
       mountDomainControls($('#dlist', root).parentElement, p, {
         summary: (q, d, isOn) => isOn ? cardSummary(q, d) : '',
         saved: () => { const q = PAT[id]; $('#cardsOn', root).textContent = `${q.unlocked.length} of 6`; drawChart(); },
       });
       // Load recent written answers and show them (or a short message if they cannot load)
-      window.HKL.insights(p, 4).then(r => { const ul = $('#recentCi', root); if (ul) ul.innerHTML = wordsHTML(r.words, 4); })
+      window.HKL.insights(p, 14, 14).then(r => { const ul = $('#recentCi', root); if (ul) ul.innerHTML = wordsHTML(r.words, r.words.length); })
         .catch(() => { const ul = $('#recentCi', root); if (ul) ul.innerHTML = '<li class="muted">Could not load responses.</li>'; });
-    }, cleanup() { chart && chart.destroy(); }
+    }, cleanup() { chart && chart.destroy(); chat && chat.destroy(); }
   };
 }, 'patient-page');
